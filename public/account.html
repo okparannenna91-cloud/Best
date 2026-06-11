@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Account — SOLLENE</title>
+  <link rel="canonical" href="https://sollene.site/account">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="account-page">
+  <header class="header" id="header">
+    <div class="header-inner">
+      <a href="/" class="logo">SOLLENE</a>
+      <nav class="nav">
+        <ul class="nav-list">
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/shop" class="nav-link">Shop</a></li>
+        </ul>
+      </nav>
+      <div class="header-actions">
+        <button class="header-icon cart-icon" id="cartToggle">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="badge cart-badge" id="cartBadge">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="account-layout">
+      <aside class="account-sidebar">
+        <div class="account-user">
+          <div class="account-avatar" id="accAvatar"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div class="account-name" id="accName">Loading...</div>
+          <div class="account-email" id="accEmail"></div>
+        </div>
+        <nav class="account-nav">
+          <div class="account-nav-item active" data-tab="overview"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Overview</div>
+          <div class="account-nav-item" data-tab="orders"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> Orders</div>
+          <div class="account-nav-item" data-tab="addresses"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Addresses</div>
+          <div class="account-nav-item" data-tab="wishlist"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> Wishlist</div>
+          <div class="account-nav-item" data-tab="settings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</div>
+        </nav>
+      </aside>
+
+      <main class="account-main" id="accountMain">
+        <div style="text-align:center;padding:40px 0;color:var(--color-gray-400)">Loading your account...</div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const API = '/api';
+    let currentTab = 'overview';
+    let userData = null;
+    let wishlistItems = [];
+
+    async function apiFetch(url, opts = {}) {
+      const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+      return await res.json();
+    }
+
+    async function loadUser() {
+      const res = await apiFetch(`${API}/users/profile`);
+      if (res.success) {
+        userData = res.data;
+        document.getElementById('accName').textContent = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'User';
+        document.getElementById('accEmail').textContent = userData.email;
+        if (userData.avatar) {
+          document.getElementById('accAvatar').innerHTML = `<img src="${userData.avatar}" alt="">`;
+        }
+      }
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.account-nav-item').forEach((el) => el.classList.toggle('active', el.dataset.tab === tab));
+      loadTabContent(tab);
+    }
+
+    async function loadTabContent(tab) {
+      const main = document.getElementById('accountMain');
+      if (tab === 'overview') renderOverview(main);
+      else if (tab === 'orders') { main.innerHTML = '<p style="color:var(--color-gray-400)">Loading orders...</p>'; await renderOrders(main); }
+      else if (tab === 'addresses') { main.innerHTML = '<p style="color:var(--color-gray-400)">Loading addresses...</p>'; await renderAddresses(main); }
+      else if (tab === 'wishlist') { main.innerHTML = '<p style="color:var(--color-gray-400)">Loading wishlist...</p>'; await renderWishlist(main); }
+      else if (tab === 'settings') renderSettings(main);
+    }
+
+    function renderOverview(el) {
+      el.innerHTML = `
+        <h2 class="account-section-title">Account Overview</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+          <div style="padding:20px;border:1px solid var(--color-gray-100)"><div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--color-gray-400)">Name</div><div style="font-weight:600;margin-top:4px">${(userData?.firstName || '') + ' ' + (userData?.lastName || '') || '—'}</div></div>
+          <div style="padding:20px;border:1px solid var(--color-gray-100)"><div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--color-gray-400)">Email</div><div style="font-weight:600;margin-top:4px">${userData?.email || '—'}</div></div>
+          <div style="padding:20px;border:1px solid var(--color-gray-100)"><div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--color-gray-400)">Phone</div><div style="font-weight:600;margin-top:4px">${userData?.phone || '—'}</div></div>
+          <div style="padding:20px;border:1px solid var(--color-gray-100)"><div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--color-gray-400)">Addresses</div><div style="font-weight:600;margin-top:4px">${userData?.addresses?.length || 0} saved</div></div>
+        </div>
+        <a href="/shop" class="btn btn-primary">Continue Shopping</a>
+      `;
+    }
+
+    async function renderOrders(el) {
+      const data = await apiFetch(`${API}/orders?limit=20`);
+      if (!data.success || !data.data?.length) {
+        el.innerHTML = `<h2 class="account-section-title">Orders</h2><p style="color:var(--color-gray-400);padding:20px 0">No orders yet. <a href="/shop">Start shopping</a></p>`;
+        return;
+      }
+      let html = `<h2 class="account-section-title">Orders (${data.pagination?.total || data.data.length})</h2>`;
+      data.data.forEach((o) => {
+        html += `<div style="padding:16px 0;border-bottom:1px solid var(--color-gray-50);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <div><div style="font-weight:600;font-size:0.9rem">#${o._id.slice(-8).toUpperCase()}</div><div style="font-size:0.8rem;color:var(--color-gray-400)">${new Date(o.createdAt).toLocaleDateString()}</div></div>
+          <div><span class="account-order-status status-${o.status}">${o.status}</span></div>
+          <div style="font-weight:600">₦${Number(o.total).toLocaleString()}</div>
+          <div style="font-size:0.8rem;color:var(--color-gray-500)">${o.items?.length || 0} item(s)</div>
+        </div>`;
+      });
+      el.innerHTML = html;
+    }
+
+    async function renderAddresses(el) {
+      const data = await apiFetch(`${API}/users/addresses`);
+      let html = `<h2 class="account-section-title">Addresses</h2>`;
+      if (data.success && data.data?.length) {
+        data.data.forEach((a) => {
+          html += `<div class="address-card ${a.isDefault ? 'default' : ''}">
+            <div class="address-card-label">${a.label} ${a.isDefault ? '<span class="default-badge">Default</span>' : ''}</div>
+            <div>${a.fullName}</div>
+            <div>${a.street}, ${a.city}, ${a.state} ${a.zipCode}</div>
+            <div>${a.country} · ${a.phone}</div>
+          </div>`;
+        });
+      } else {
+        html += `<p style="color:var(--color-gray-400);padding:12px 0">No addresses saved.</p>`;
+      }
+      html += `<button class="btn btn-outline btn-sm" onclick="alert('Address form coming soon')">+ Add Address</button>`;
+      el.innerHTML = html;
+    }
+
+    async function renderWishlist(el) {
+      const stored = JSON.parse(localStorage.getItem('sollene_wishlist') || '[]');
+      if (!stored.length) {
+        el.innerHTML = `<h2 class="account-section-title">Wishlist</h2><p style="color:var(--color-gray-400);padding:12px 0">Your wishlist is empty. <a href="/shop">Browse products</a></p>`;
+        return;
+      }
+      let html = `<h2 class="account-section-title">Wishlist (${stored.length})</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px">`;
+      for (const id of stored) {
+        try {
+          const res = await fetch(`${API}/products/related/${id}`);
+          const d = await res.json();
+          if (d.data) {
+            d.data.forEach((p) => {
+              html += `<div style="border:1px solid var(--color-gray-100);padding:12px;text-align:center;cursor:pointer" onclick="window.location='/product/${p.slug}'">
+                <div style="height:120px;background:var(--color-gray-50);margin-bottom:8px;overflow:hidden"><img src="${p.images?.[0] || ''}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'"></div>
+                <div style="font-size:0.85rem;font-weight:500">${p.name}</div>
+                <div style="font-size:0.85rem;font-weight:600;margin-top:4px">₦${Number(p.price).toLocaleString()}</div>
+              </div>`;
+            });
+          }
+        } catch (_) {}
+      }
+      html += '</div>';
+      el.innerHTML = html;
+    }
+
+    function renderSettings(el) {
+      el.innerHTML = `
+        <h2 class="account-section-title">Account Settings</h2>
+        <div class="account-form">
+          <div class="form-group"><label>First Name</label><input class="form-input" id="sFirstName" value="${userData?.firstName || ''}"></div>
+          <div class="form-group"><label>Last Name</label><input class="form-input" id="sLastName" value="${userData?.lastName || ''}"></div>
+          <div class="form-group"><label>Phone</label><input class="form-input" id="sPhone" value="${userData?.phone || ''}"></div>
+          <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+          <div id="saveMsg" style="font-size:0.85rem;color:var(--color-gray-400)"></div>
+        </div>
+      `;
+    }
+
+    async function saveProfile() {
+      const body = { firstName: document.getElementById('sFirstName').value, lastName: document.getElementById('sLastName').value, phone: document.getElementById('sPhone').value };
+      const res = await apiFetch(`${API}/users/profile`, { method: 'PUT', body: JSON.stringify(body) });
+      document.getElementById('saveMsg').textContent = res.success ? 'Profile updated!' : 'Error updating profile';
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadUser();
+      const tab = window.location.pathname.split('/')[2] || 'overview';
+      if (['overview','orders','addresses','wishlist','settings'].includes(tab)) switchTab(tab);
+      else switchTab('overview');
+
+      document.querySelectorAll('.account-nav-item').forEach((el) => {
+        el.addEventListener('click', () => switchTab(el.dataset.tab));
+      });
+    });
+  </script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

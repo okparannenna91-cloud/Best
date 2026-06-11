@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Details — SOLLENE</title>
+  <link rel="canonical" href="https://sollene.site/account/orders">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="header" id="header"><div class="header-inner"><a href="/" class="logo">SOLLENE</a><nav class="nav"><ul class="nav-list"><li><a href="/" class="nav-link">Home</a></li><li><a href="/account" class="nav-link">Account</a></li></ul></nav></div></header>
+  <div class="container" style="padding:40px 0;max-width:720px;margin:0 auto">
+    <a href="/account/orders" style="font-size:0.85rem;color:var(--color-gray-400)">&larr; Back to Orders</a>
+    <div id="orderDetail"><p style="color:var(--color-gray-400);padding:40px 0;text-align:center">Loading...</p></div>
+  </div>
+  <script>
+    const id = window.location.pathname.split('/order/')[1];
+    async function loadOrder() {
+      if (!id) return document.getElementById('orderDetail').innerHTML = '<p style="color:#dc2626">Invalid order ID</p>';
+      const res = await fetch(`/api/orders/${id}`);
+      const d = await res.json();
+      if (!d.success) return document.getElementById('orderDetail').innerHTML = '<p style="color:#dc2626">Order not found</p>';
+      const o = d.data;
+      const dl = (url) => { const a = document.createElement('a'); a.href = url; a.download = 'invoice-'+o._id.slice(-8)+'.html'; a.click(); };
+      let html = `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:24px"><h1 style="font-family:var(--font-display);font-size:1.25rem">Order #${o._id.slice(-8).toUpperCase()}</h1><span class="account-order-status status-${o.status}">${o.status}</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+        <div style="padding:16px;border:1px solid var(--color-gray-100)"><div style="font-size:0.75rem;text-transform:uppercase;color:var(--color-gray-400);margin-bottom:8px">Shipping</div><div style="font-size:0.85rem">${o.shippingAddress?.fullName}<br>${o.shippingAddress?.street}<br>${o.shippingAddress?.city}, ${o.shippingAddress?.state} ${o.shippingAddress?.zipCode}</div></div>
+        <div style="padding:16px;border:1px solid var(--color-gray-100)"><div style="font-size:0.75rem;text-transform:uppercase;color:var(--color-gray-400);margin-bottom:8px">Payment</div><div style="font-size:0.85rem">${o.paymentMethod || 'Paystack'}<br>Ref: ${o.paymentReference || '—'}<br>${o.paidAt ? 'Paid: '+new Date(o.paidAt).toLocaleDateString() : ''}</div></div>
+      </div>
+      <div style="overflow-x:auto;margin-bottom:24px"><table class="admin-table"><tr><th>Item</th><th>Price</th><th>Qty</th><th>Total</th></tr>`;
+      o.items.forEach(i => { html += `<tr><td>${i.name}${i.variant ? ' ('+i.variant+')' : ''}</td><td>\u20A6${Number(i.price).toLocaleString()}</td><td>${i.quantity}</td><td>\u20A6${(i.price*i.quantity).toLocaleString()}</td></tr>`; });
+      html += `</table></div>
+      <div style="text-align:right;padding:16px;border-top:1px solid var(--color-gray-100)">
+        <div style="font-size:0.85rem;color:var(--color-gray-500);margin-bottom:4px">Subtotal: \u20A6${Number(o.subtotal).toLocaleString()}</div>
+        ${o.discount ? `<div style="font-size:0.85rem;color:#059669;margin-bottom:4px">Discount: -\u20A6${Number(o.discount).toLocaleString()}</div>` : ''}
+        <div style="font-size:0.85rem;color:var(--color-gray-500);margin-bottom:4px">Shipping: ${o.shippingCost ? '\u20A6'+Number(o.shippingCost).toLocaleString() : 'Free'}</div>
+        <div style="font-size:1.1rem;font-weight:700;margin-top:8px">Total: \u20A6${Number(o.total).toLocaleString()}</div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:24px">
+        <button class="btn btn-primary btn-sm" onclick="window.print()">Print / Download Invoice</button>
+        ${o.trackingNumber ? `<div style="padding:12px;background:var(--color-gray-50);font-size:0.85rem">Tracking: <strong>${o.trackingNumber}</strong></div>` : ''}
+      </div>`;
+      document.getElementById('orderDetail').innerHTML = html;
+    }
+    document.addEventListener('DOMContentLoaded', loadOrder);
+  </script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

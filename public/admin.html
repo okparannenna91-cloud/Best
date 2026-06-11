@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — SOLLENE</title>
+<link rel="canonical" href="https://sollene.site/admin">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:24px}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;width:100%;max-width:600px;max-height:80vh;overflow-y:auto;padding:32px}
+.modal h2{font-family:var(--font-display);font-size:1.2rem;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--color-gray-100)}
+.modal-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--color-gray-100)}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:600px){.form-row-3,.form-row{grid-template-columns:1fr}}
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 24px;background:var(--color-black);color:var(--color-white);font-size:0.85rem;z-index:2000;opacity:0;transition:var(--transition-base);pointer-events:none}
+.toast.show{opacity:1}
+</style>
+</head>
+<body class="admin-page">
+<header class="header" id="header"><div class="header-inner"><a href="/admin" class="logo" style="font-size:0.95rem">SOLLENE · Admin</a><nav class="nav"><ul class="nav-list"><li><a href="/" class="nav-link">Back to Store</a></li></ul></nav><div class="header-actions"><button class="header-icon" onclick="signOut()" title="Sign out"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button></div></div></header>
+<div class="container"><div class="admin-layout">
+<aside class="admin-sidebar"><span class="admin-logo">Panel</span>
+<nav class="admin-nav">
+<div class="admin-nav-item active" data-section="dashboard"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Dashboard</div>
+<div class="admin-nav-item" data-section="products"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> Products</div>
+<div class="admin-nav-item" data-section="orders"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> Orders</div>
+<div class="admin-nav-item" data-section="customers"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Customers</div>
+            <div class="admin-nav-item" data-section="coupons"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"/></svg> Coupons</div>
+            <div class="admin-nav-item" data-section="categories"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Categories</div>
+            <div class="admin-nav-item" data-section="featured"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Featured</div>
+            <div class="admin-nav-item" data-section="flash-sales"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Flash Sales</div>
+            <div class="admin-nav-item" data-section="announcements"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 18-4-7-7-4 18-7z"/></svg> Announcements</div>
+            <div class="admin-nav-item" data-section="banners"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg> Banners</div>
+</nav></aside>
+<main class="admin-main" id="adminMain"><div style="text-align:center;padding:60px 0;color:var(--color-gray-400)">Loading admin panel...</div></main>
+</div></div>
+<div class="modal-overlay" id="modalOverlay"><div class="modal" id="modalContent"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api/admin';
+let currentSection = 'dashboard';
+let categories = [];
+
+async function apiFetch(url, opts = {}) {
+  const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+  return await res.json();
+}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open')}
+function openModal(html){document.getElementById('modalContent').innerHTML=html;document.getElementById('modalOverlay').classList.add('open')}
+function switchSection(s){currentSection=s;document.querySelectorAll('.admin-nav-item').forEach(e=>e.classList.toggle('active',e.dataset.section===s));loadSection(s)}
+async function loadSection(section){const m=document.getElementById('adminMain');m.innerHTML='<p style="color:var(--color-gray-400)">Loading...</p>';if(section==='dashboard')await renderDashboard(m);else if(section==='products'){await fetchCategories();await renderProducts(m);}else if(section==='orders')await renderOrders(m);else if(section==='customers')await renderCustomers(m);else if(section==='coupons')await renderCoupons(m);else if(section==='categories')await renderCategories(m);else if(section==='featured')await renderFeatured(m);else if(section==='flash-sales')await renderFlashSales(m);else if(section==='announcements')await renderAnnouncements(m);else if(section==='banners')await renderBanners(m);}
+
+async function fetchCategories(){const r=await fetch('/api/categories');const d=await r.json();categories=d.data||[];}
+
+async function renderDashboard(el){
+  const d=await apiFetch(API+'/dashboard');
+  let html=`<div class="admin-header"><h1>Dashboard</h1><span style="font-size:0.85rem;color:var(--color-gray-400)">${new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</span></div>`;
+  if(d.success){const s=d.data;
+    html+=`<div class="admin-stats">
+      <div class="admin-stat-card"><div class="admin-stat-label">Revenue</div><div class="admin-stat-value">\u20A6${Number(s.totalRevenue||0).toLocaleString()}</div><div class="admin-stat-change">${s.monthRevenue?'\u20A6'+Number(s.monthRevenue).toLocaleString()+' this month':''}</div></div>
+      <div class="admin-stat-card"><div class="admin-stat-label">Orders</div><div class="admin-stat-value">${s.totalOrders||0}</div></div>
+      <div class="admin-stat-card"><div class="admin-stat-label">Products</div><div class="admin-stat-value">${s.totalProducts||0}</div><div class="admin-stat-change">${s.lowStockProducts||0} low stock</div></div>
+      <div class="admin-stat-card"><div class="admin-stat-label">Customers</div><div class="admin-stat-value">${s.totalCustomers||0}</div></div>
+    </div>`;
+  }
+  el.innerHTML=html+`<div class="admin-card"><div class="admin-card-header"><div class="admin-card-title">Recent Orders</div></div><div id="dashOrders"><p style="color:var(--color-gray-400)">Loading...</p></div></div>`;
+  const o=await apiFetch(API+'/orders?limit=5');
+  if(o.success&&o.data?.length){let t='<table class="admin-table"><tr><th>Order</th><th>Customer</th><th>Status</th><th>Total</th></tr>';o.data.forEach(x=>{t+=`<tr><td>#${x._id.slice(-8).toUpperCase()}</td><td>${x.shippingAddress?.fullName||'—'}</td><td><span class="admin-badge status-${x.status}">${x.status}</span></td><td>\u20A6${Number(x.total).toLocaleString()}</td></tr>`});t+='</table>';document.getElementById('dashOrders').innerHTML=t;}
+}
+
+async function renderProducts(el){
+  let html=`<div class="admin-header"><h1>Products</h1><button class="btn btn-primary btn-sm" onclick="productForm()">+ Add Product</button></div>`;
+  const d=await apiFetch(API+'/products?limit=100');
+  if(d.success&&d.data?.length){let t='<div style="overflow-x:auto"><table class="admin-table"><tr><th></th><th>Name</th><th>Price</th><th>Stock</th><th>Category</th><th>Featured</th><th></th></tr>';
+    d.data.forEach(p=>{
+      t+=`<tr><td>${p.images?.[0]?'<div style="width:36px;height:36px;background:var(--color-gray-50);overflow:hidden;border-radius:4px"><img src="'+p.images[0]+'" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\'"></div>':''}</td>
+      <td style="font-weight:500">${p.name}</td>
+      <td>\u20A6${Number(p.price).toLocaleString()}</td>
+      <td style="color:${p.stock<=5?'#dc2626':'inherit'}">${p.stock??'—'}</td>
+      <td style="font-size:0.8rem">${p.category?.name||'—'}</td>
+      <td>${p.isFeatured?'✓':''}</td>
+      <td><button class="btn btn-outline btn-xs" onclick="productForm('${p._id}')">Edit</button> <button class="btn btn-outline btn-xs" style="color:#dc2626" onclick="deleteProduct('${p._id}','${p.name}')">Del</button></td></tr>`;
+    });t+='</table></div>';el.innerHTML=html+t;
+  }else{el.innerHTML=html+'<p style="color:var(--color-gray-400);padding:20px 0">No products found.</p>';}
+}
+
+let pVariants=[];
+
+function productForm(id){
+  pVariants=[];
+  const isEdit=!!id;
+  openModal(`<h2>${isEdit?'Edit':'Add'} Product</h2>
+    <form id="productForm" style="display:flex;flex-direction:column;gap:12px">
+      <div class="form-row"><div class="form-group"><label>Name</label><input class="form-input" id="pName" required></div>
+      <div class="form-group"><label>Slug</label><input class="form-input" id="pSlug" placeholder="leave blank to auto-generate"></div></div>
+      <div class="form-group"><label>Description</label><textarea class="form-input" id="pDesc" rows="3"></textarea></div>
+      <div class="form-row-3"><div class="form-group"><label>Price (₦)</label><input class="form-input" id="pPrice" type="number" required></div>
+      <div class="form-group"><label>Compare Price</label><input class="form-input" id="pCompare" type="number"></div>
+      <div class="form-group"><label>Stock</label><input class="form-input" id="pStock" type="number" value="0"></div></div>
+      <div class="form-row"><div class="form-group"><label>Category</label><select class="form-input" id="pCategory">${categories.map(c=>'<option value="'+c._id+'">'+c.name+'</option>').join('')}</select></div>
+      <div class="form-group"><label>SKU</label><input class="form-input" id="pSku"></div></div>
+      <div class="form-row"><div class="form-group"><label>Image URLs (comma separated)</label><input class="form-input" id="pImages" placeholder="https://..."></div></div>
+      <div class="form-row"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="pFeatured"> Featured</label>
+      <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="pBestSeller"> Best Seller</label>
+      <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="pNewArrival"> New Arrival</label></div>
+      <div style="border-top:1px solid var(--color-gray-100);padding-top:12px;margin-top:4px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong style="font-size:0.85rem">Variants</strong>
+          <button type="button" class="btn btn-outline btn-xs" onclick="variantForm()">+ Add Variant</button>
+        </div>
+        <div id="variantList" style="font-size:0.8rem"><p style="color:var(--color-gray-400)">No variants added.</p></div>
+      </div>
+      <div class="modal-actions"><button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">${isEdit?'Update':'Create'} Product</button></div>
+    </form>`);
+  if(isEdit){
+    apiFetch(API+'/products/'+id).then(r=>{if(r.success){const p=r.data;document.getElementById('pName').value=p.name;document.getElementById('pSlug').value=p.slug;document.getElementById('pDesc').value=p.description||'';document.getElementById('pPrice').value=p.price;document.getElementById('pCompare').value=p.comparePrice||'';document.getElementById('pStock').value=p.stock;document.getElementById('pSku').value=p.sku||'';document.getElementById('pImages').value=(p.images||[]).join(', ');document.getElementById('pFeatured').checked=p.isFeatured;document.getElementById('pBestSeller').checked=p.isBestSeller;document.getElementById('pNewArrival').checked=p.isNewArrival;if(p.category)document.getElementById('pCategory').value=p.category._id||p.category;if(p.variants){pVariants=p.variants;renderVariantList();}}});
+  }
+  document.getElementById('productForm').addEventListener('submit',async(e)=>{
+    e.preventDefault();const body={name:document.getElementById('pName').value,slug:document.getElementById('pSlug').value||undefined,description:document.getElementById('pDesc').value,price:Number(document.getElementById('pPrice').value),comparePrice:Number(document.getElementById('pCompare').value)||undefined,stock:Number(document.getElementById('pStock').value),sku:document.getElementById('pSku').value,category:document.getElementById('pCategory').value,images:document.getElementById('pImages').value.split(',').map(s=>s.trim()).filter(Boolean),isFeatured:document.getElementById('pFeatured').checked,isBestSeller:document.getElementById('pBestSeller').checked,isNewArrival:document.getElementById('pNewArrival').checked,variants:pVariants};
+    const url=isEdit?API+'/products/'+id:API+'/products';const method=isEdit?'PUT':'POST';
+    const r=await apiFetch(url,{method,body:JSON.stringify(body)});
+    if(r.success){closeModal();toast(isEdit?'Product updated':'Product created');loadSection('products');}else{toast(r.message||'Error');}
+  });
+}
+
+function renderVariantList(){
+  const el=document.getElementById('variantList');
+  if(!pVariants.length){el.innerHTML='<p style="color:var(--color-gray-400)">No variants added.</p>';return;}
+  let t='<table style="width:100%;border-collapse:collapse"><tr><th style="text-align:left;padding:4px 8px;border-bottom:1px solid var(--color-gray-100)">Name</th><th style="text-align:left;padding:4px 8px;border-bottom:1px solid var(--color-gray-100)">SKU</th><th style="text-align:left;padding:4px 8px;border-bottom:1px solid var(--color-gray-100)">Price</th><th style="text-align:left;padding:4px 8px;border-bottom:1px solid var(--color-gray-100)">Stock</th><th style="padding:4px 8px;border-bottom:1px solid var(--color-gray-100)"></th></tr>';
+  pVariants.forEach((v,i)=>{
+    t+=`<tr><td style="padding:4px 8px">${v.name}</td><td style="padding:4px 8px">${v.sku||'—'}</td><td style="padding:4px 8px">${v.price?'₦'+Number(v.price).toLocaleString():'—'}</td><td style="padding:4px 8px">${v.stock??0}</td>
+      <td style="padding:4px 8px"><button type="button" class="btn btn-outline btn-xs" onclick="editVariant(${i})">Edit</button> <button type="button" class="btn btn-outline btn-xs" style="color:#dc2626" onclick="removeVariant(${i})">×</button></td></tr>`;
+  });
+  t+='</table>';el.innerHTML=t;
+}
+
+function variantForm(index){
+  const isEdit=index!==undefined;
+  const v=isEdit?pVariants[index]:{name:'',sku:'',price:'',stock:0,attributes:{}};
+  openModal(`<h2>${isEdit?'Edit':'Add'} Variant</h2>
+    <form id="variantForm" style="display:flex;flex-direction:column;gap:12px">
+      <div class="form-group"><label>Variant Name</label><input class="form-input" id="vName" value="${v.name}" required placeholder="e.g. Small / Red"></div>
+      <div class="form-row"><div class="form-group"><label>SKU</label><input class="form-input" id="vSku" value="${v.sku||''}"></div>
+      <div class="form-group"><label>Price (override)</label><input class="form-input" id="vPrice" type="number" value="${v.price||''}"></div></div>
+      <div class="form-row"><div class="form-group"><label>Stock</label><input class="form-input" id="vStock" type="number" value="${v.stock??0}"></div></div>
+      <div class="modal-actions"><button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">${isEdit?'Update':'Add'} Variant</button></div>
+    </form>`);
+  document.getElementById('variantForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    const variant={name:document.getElementById('vName').value,sku:document.getElementById('vSku').value,price:Number(document.getElementById('vPrice').value)||undefined,stock:Number(document.getElementById('vStock').value)};
+    if(isEdit){pVariants[index]=variant;}else{pVariants.push(variant);}
+    closeModal();renderVariantList();
+  });
+}
+
+function editVariant(i){variantForm(i);}
+function removeVariant(i){pVariants.splice(i,1);renderVariantList();}
+
+async function deleteProduct(id,name){
+  if(!confirm('Delete "'+name+'"?'))return;
+  const r=await apiFetch(API+'/products/'+id,{method:'DELETE'});
+  if(r.success){toast('Product deleted');loadSection('products');}else{toast(r.message||'Error');}
+}
+
+async function renderOrders(el){
+  let html=`<div class="admin-header"><h1>Orders</h1></div>`;
+  const d=await apiFetch(API+'/orders?limit=100');
+  if(d.success&&d.data?.length){let t='<div style="overflow-x:auto"><table class="admin-table"><tr><th>#</th><th>Customer</th><th>Email</th><th>Items</th><th>Status</th><th>Total</th><th></th></tr>';
+    d.data.forEach(o=>{t+=`<tr><td style="font-size:0.8rem">${o._id.slice(-8).toUpperCase()}</td><td>${o.shippingAddress?.fullName||'—'}</td><td style="font-size:0.8rem">${o.email||'—'}</td><td>${o.items?.length||0}</td><td><span class="admin-badge status-${o.status}">${o.status}</span></td><td>\u20A6${Number(o.total).toLocaleString()}</td>
+      <td><button class="btn btn-outline btn-xs" onclick="orderForm('${o._id}')">Update</button></td></tr>`;});
+    t+='</table></div>';el.innerHTML=html+t;
+  }else{el.innerHTML=html+'<p style="color:var(--color-gray-400)">No orders found.</p>';}
+}
+
+function orderForm(id){
+  apiFetch(API+'/orders/'+id).then(r=>{if(!r.success)return;const o=r.data;
+    openModal(`<h2>Order #${o._id.slice(-8).toUpperCase()}</h2>
+      <div style="font-size:0.85rem;margin-bottom:16px;padding:12px;background:var(--color-gray-50)">
+        <strong>Customer:</strong> ${o.shippingAddress?.fullName||'—'}<br>
+        <strong>Email:</strong> ${o.email||'—'}<br>
+        <strong>Total:</strong> \u20A6${Number(o.total).toLocaleString()}<br>
+        <strong>Payment:</strong> ${o.paymentReference||'—'} · ${o.paymentStatus}
+      </div>
+      <form id="orderForm" style="display:flex;flex-direction:column;gap:12px">
+        <div class="form-group"><label>Status</label><select class="form-input" id="oStatus">
+          ${['Pending','Paid','Processing','Shipped','Delivered','Cancelled','Refunded'].map(s=>'<option value="'+s+'"'+(s===o.status?' selected':'')+'>'+s+'</option>').join('')}
+        </select></div>
+        <div class="form-group"><label>Tracking Number</label><input class="form-input" id="oTracking" value="${o.trackingNumber||''}"></div>
+        <div class="form-group"><label>Notes</label><textarea class="form-input" id="oNotes" rows="3">${o.notes||''}</textarea></div>
+        <div style="border-top:1px solid var(--color-gray-100);padding-top:12px;margin-top:4px">
+          <strong style="font-size:0.85rem">Refund</strong>
+          <div class="form-row" style="margin-top:8px"><div class="form-group"><label>Refund Amount (₦)</label><input class="form-input" id="oRefundAmount" type="number" value="${o.refundAmount||''}" placeholder="full or partial"></div>
+          <div class="form-group"><label>Refund Reason</label><input class="form-input" id="oRefundReason" value="${o.refundReason||''}" placeholder="e.g. Damaged item"></div></div>
+          ${o.status==='Refunded'?`<div style="font-size:0.8rem;color:var(--color-gray-400)">Refunded: ${o.refundedAt?new Date(o.refundedAt).toLocaleString():'—'}</div>`:''}
+        </div>
+        <div class="modal-actions"><button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Update Order</button></div>
+      </form>`);
+    document.getElementById('orderForm').addEventListener('submit',async(e)=>{
+      e.preventDefault();
+      const body={status:document.getElementById('oStatus').value,trackingNumber:document.getElementById('oTracking').value,notes:document.getElementById('oNotes').value,refundAmount:Number(document.getElementById('oRefundAmount').value)||undefined,refundReason:document.getElementById('oRefundReason').value||undefined};
+      const r=await apiFetch(API+'/orders/'+id,{method:'PUT',body:JSON.stringify(body)});
+      if(r.success){closeModal();toast('Order updated');loadSection('orders');}else{toast(r.message||'Error');}
+    });
+  });
+}
+
+async function renderCustomers(el){
+  let html=`<div class="admin-header"><h1>Customers</h1></div>`;
+  const d=await apiFetch(API+'/customers?limit=100');
+  if(d.success&&d.data?.length){let t='<div style="overflow-x:auto"><table class="admin-table"><tr><th>Name</th><th>Email</th><th>Member Since</th><th></th></tr>';
+    d.data.forEach(c=>{t+=`<tr><td style="font-weight:500">${c.firstName||''} ${c.lastName||''}</td><td style="font-size:0.85rem">${c.email||'—'}</td><td style="font-size:0.8rem;color:var(--color-gray-400)">${c.createdAt?new Date(c.createdAt).toLocaleDateString():'—'}</td>
+      <td><button class="btn btn-outline btn-xs" onclick="customerDetail('${c._id}')">View</button></td></tr>`;});
+    t+='</table></div>';el.innerHTML=html+t;
+  }else{el.innerHTML=html+'<p style="color:var(--color-gray-400)">No customers found.</p>';}
+}
+
+async function customerDetail(id){
+  const r=await apiFetch(API+'/customers/'+id);
+  if(!r.success)return;const c=r.data;
+  openModal(`<h2>${c.firstName||''} ${c.lastName||''}</h2>
+    <div style="font-size:0.85rem"><p><strong>Email:</strong> ${c.email||'—'}</p><p><strong>Phone:</strong> ${c.phone||'—'}</p><p><strong>Joined:</strong> ${c.createdAt?new Date(c.createdAt).toLocaleDateString():'—'}</p>
+    <p><strong>Orders:</strong> ${c.orders?.length||'—'}</p><p><strong>Admin:</strong> ${c.isAdmin?'Yes':'No'}</p></div>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Close</button></div>`);
+}
+
+async function renderCoupons(el){
+  let html=`<div class="admin-header"><h1>Coupons</h1><button class="btn btn-primary btn-sm" onclick="couponForm()">+ Add Coupon</button></div>`;
+  const d=await apiFetch(API+'/coupons');
+  if(d.success&&d.data?.length){let t='<div style="overflow-x:auto"><table class="admin-table"><tr><th>Code</th><th>Type</th><th>Value</th><th>Min Order</th><th>Used</th><th>Expires</th><th>Active</th><th></th></tr>';
+    d.data.forEach(c=>{t+=`<tr><td style="font-weight:600">${c.code}</td><td>${c.type}</td><td>${c.type==='percentage'?c.value+'%':'\u20A6'+c.value}</td><td>${c.minOrderAmount?'\u20A6'+Number(c.minOrderAmount).toLocaleString():'—'}</td><td>${c.usedCount||0}</td><td style="font-size:0.8rem">${c.expiresAt?new Date(c.expiresAt).toLocaleDateString():'—'}</td><td>${c.isActive?'✓':'✗'}</td>
+      <td><button class="btn btn-outline btn-xs" onclick="couponForm('${c._id}')">Edit</button> <button class="btn btn-outline btn-xs" style="color:#dc2626" onclick="deleteCoupon('${c._id}')">Del</button></td></tr>`;});
+    t+='</table></div>';el.innerHTML=html+t;
+  }else{el.innerHTML=html+'<p style="color:var(--color-gray-400)">No coupons found.</p>';}
+}
+
+function couponForm(id){
+  const isEdit=!!id;
+  openModal(`<h2>${isEdit?'Edit':'Add'} Coupon</h2>
+    <form id="couponForm" style="display:flex;flex-direction:column;gap:12px">
+      <div class="form-row"><div class="form-group"><label>Code</label><input class="form-input" id="cCode" required></div>
+      <div class="form-group"><label>Type</label><select class="form-input" id="cType"><option value="percentage">Percentage</option><option value="fixed">Fixed</option></select></div></div>
+      <div class="form-row-3"><div class="form-group"><label>Value</label><input class="form-input" id="cValue" type="number" required></div>
+      <div class="form-group"><label>Min Order (₦)</label><input class="form-input" id="cMin" type="number" value="0"></div>
+      <div class="form-group"><label>Max Discount</label><input class="form-input" id="cMax" type="number"></div></div>
+      <div class="form-row"><div class="form-group"><label>Usage Limit</label><input class="form-input" id="cLimit" type="number" placeholder="unlimited"></div>
+      <div class="form-group"><label>Expires</label><input class="form-input" id="cExpires" type="date" required></div></div>
+      <div class="form-group"><label>Description</label><input class="form-input" id="cDesc"></div>
+      <div class="modal-actions"><button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">${isEdit?'Update':'Create'} Coupon</button></div>
+    </form>`);
+  if(isEdit){
+    apiFetch(API+'/coupons/'+id).then(r=>{if(r.success){const c=r.data;document.getElementById('cCode').value=c.code;document.getElementById('cType').value=c.type;document.getElementById('cValue').value=c.value;document.getElementById('cMin').value=c.minOrderAmount||0;document.getElementById('cMax').value=c.maxDiscount||'';document.getElementById('cLimit').value=c.usageLimit||'';document.getElementById('cExpires').value=c.expiresAt?new Date(c.expiresAt).toISOString().split('T')[0]:'';document.getElementById('cDesc').value=c.description||'';}});
+  }
+  document.getElementById('couponForm').addEventListener('submit',async(e)=>{
+    e.preventDefault();
+    const body={code:document.getElementById('cCode').value,type:document.getElementById('cType').value,value:Number(document.getElementById('cValue').value),minOrderAmount:Number(document.getElementById('cMin').value),maxDiscount:Number(document.getElementById('cMax').value)||undefined,usageLimit:Number(document.getElementById('cLimit').value)||undefined,expiresAt:new Date(document.getElementById('cExpires').value).toISOString(),description:document.getElementById('cDesc').value};
+    const url=isEdit?API+'/coupons/'+id:API+'/coupons';const method=isEdit?'PUT':'POST';
+    const r=await apiFetch(url,{method,body:JSON.stringify(body)});
+    if(r.success){closeModal();toast(isEdit?'Coupon updated':'Coupon created');loadSection('coupons');}else{toast(r.message||'Error');}
+  });
+}
+
+async function deleteCoupon(id){if(!confirm('Delete this coupon?'))return;const r=await apiFetch(API+'/coupons/'+id,{method:'DELETE'});if(r.success){toast('Coupon deleted');loadSection('coupons');}else{toast(r.message||'Error');}}
+
+async function renderCategories(el){
+  let html=`<div class="admin-header"><h1>Categories</h1><button class="btn btn-primary btn-sm" onclick="categoryForm()">+ Add Category</button></div>`;
+  const d=await apiFetch(API+'/categories');
+  if(d.success&&d.data?.length){let t='<div style="overflow-x:auto"><table class="admin-table"><tr><th>Name</th><th>Slug</th><th>Order</th><th>Products</th><th>Active</th><th></th></tr>';
+    d.data.forEach(c=>{t+=`<tr><td style="font-weight:500">${c.name}</td><td style="font-size:0.8rem">${c.slug}</td><td>${c.order||0}</td><td style="font-size:0.8rem">—</td><td>${c.isActive!==false?'✓':'✗'}</td>
+      <td><button class="btn btn-outline btn-xs" onclick="categoryForm('${c._id}')">Edit</button> <button class="btn btn-outline btn-xs" style="color:#dc2626" onclick="deleteCategory('${c._id}','${c.name}')">Del</button></td></tr>`;});
+    t+='</table></div>';el.innerHTML=html+t;
+  }else{el.innerHTML=html+'<p style="color:var(--color-gray-400)">No categories found.</p>';}
+}
+
+function categoryForm(id){
+  const isEdit=!!id;
+  openModal(`<h2>${isEdit?'Edit':'Add'} Category</h2>
+    <form id="categoryForm" style="display:flex;flex-direction:column;gap:12px">
+      <div class="form-row"><div class="form-group"><label>Name</label><input class="form-input" id="catName" required></div>
+      <div class="form-group"><label>Slug</label><input class="form-input" id="catSlug" placeholder="auto"></div></div>
+      <div class="form-group"><label>Description</label><textarea class="form-input" id="catDesc" rows="2"></textarea></div>
+      <div class="form-row"><div class="form-group"><label>Image URL</label><input class="form-input" id="catImage" placeholder="https://..."></div>
+      <div class="form-group"><label>Order</label><input class="form-input" id="catOrder" type="number" value="0"></div></div>
+      <div class="form-row"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="catActive" checked> Active</label></div>
+      <div class="modal-actions"><button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">${isEdit?'Update':'Create'} Category</button></div>
+    </form>`);
+  if(isEdit){
+    apiFetch(API+'/categories/'+id).then(r=>{if(r.success){const c=r.data;document.getElementById('catName').value=c.name;document.getElementById('catSlug').value=c.slug;document.getElementById('catDesc').value=c.description||'';document.getElementById('catImage').value=c.image||'';document.getElementById('catOrder').value=c.order||0;document.getElementById('catActive').checked=c.isActive!==false;}});
+  }
+  document.getElementById('categoryForm').addEventListener('submit',async(e)=>{
+    e.preventDefault();
+    const body={name:document.getElementById('catName').value,slug:document.getElementById('catSlug').value||undefined,description:document.getElementById('catDesc').value,image:document.getElementById('catImage').value,order:Number(document.getElementById('catOrder').value),isActive:document.getElementById('catActive').checked};
+    const url=isEdit?API+'/categories/'+id:API+'/categories';const method=isEdit?'PUT':'POST';
+    const r=await apiFetch(url,{method,body:JSON.stringify(body)});
+    if(r.success){closeModal();toast(isEdit?'Category updated':'Category created');loadSection('categories');}else{toast(r.message||'Error');}
+  });
+}
+
+async function deleteCategory(id,name){if(!confirm('Delete category "'+name+'"?'))return;const r=await apiFetch(API+'/categories/'+id,{method:'DELETE'});if(r.success){toast('Category deleted');loadSection('categories');}else{toast(r.message||'Error');}}
+
+async function renderFeatured(el){
+  let html=`<div class="admin-header"><h1>Featured Products</h1></div>`;
+  const d=await apiFetch(API+'/products?limit=100');
+  if(d.success&&d.data?.length){
+    const featured=d.data.filter(p=>p.isFeatured);
+    if(featured.length){let t='<div style="overflow-x:auto"><table class="admin-table"><tr><th></th><th>Name</th><th>Featured</th><th></th></tr>';
+      featured.forEach(p=>{t+=`<tr><td>${p.images?.[0]?'<div style="width:36px;height:36px;background:var(--color-gray-50);overflow:hidden;border-radius:4px"><img src="'+p.images[0]+'" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\'"></div>':''}</td>
+        <td style="font-weight:500">${p.name}</td>
+        <td><span class="admin-badge status-${p.isFeatured?'Delivered':'Pending'}">${p.isFeatured?'Featured':'Not Featured'}</span></td>
+        <td><button class="btn btn-outline btn-xs" onclick="toggleFeatured('${p._id}','${p.name}',${!p.isFeatured})">${p.isFeatured?'Unfeature':'Feature'}</button></td></tr>`;});
+      t+='</table></div>';html+=t;
+    }else{html+='<p style="color:var(--color-gray-400)">No featured products. Toggle featured in the product form.</p>';}
+    html+=`<div style="margin-top:20px"><p style="font-size:0.85rem;color:var(--color-gray-400)">Manage featured status from each product's edit form, or use the toggle buttons above.</p></div>`;
+  }
+  el.innerHTML=html;
+}
+
+async function toggleFeatured(id,name,val){
+  const r=await apiFetch(API+'/products/'+id,{method:'PUT',body:JSON.stringify({isFeatured:val})});
+  if(r.success){toast(val?'Featured: '+name:'Unfeatured: '+name);loadSection('featured');}else{toast(r.message||'Error');}
+}
+
+async function renderFlashSales(el){
+  let html=`<div class="admin-header"><h1>Flash Sales</h1><button class="btn btn-primary btn-sm" onclick="flashSaleForm()">+ Add Flash Sale</button></div>`;
+  const d=await apiFetch(API+'/flash-sales');
+  if(d.success&&d.data?.length){let t='<div style="overflow-x:auto"><table class="admin-table"><tr><th>Name</th><th>Discount</th><th>Products</th><th>Start</th><th>End</th><th>Active</th><th></th></tr>';
+    d.data.forEach(s=>{t+=`<tr><td style="font-weight:500">${s.name}</td>
+      <td>${s.discountType==='percentage'?s.discountValue+'%':'\u20A6'+s.discountValue}</td>
+      <td style="font-size:0.8rem">${s.products?.length||0}</td>
+      <td style="font-size:0.8rem">${s.startDate?new Date(s.startDate).toLocaleDateString():'—'}</td>
+      <td style="font-size:0.8rem">${s.endDate?new Date(s.endDate).toLocaleDateString():'—'}</td>
+      <td>${s.isActive!==false?'✓':'✗'}</td>
+      <td><button class="btn btn-outline btn-xs" onclick="flashSaleForm('${s._id}')">Edit</button> <button class="btn btn-outline btn-xs" style="color:#dc2626" onclick="deleteFlashSale('${s._id}')">Del</button></td></tr>`;});
+    t+='</table></div>';el.innerHTML=html+t;
+  }else{el.innerHTML=html+'<p style="color:var(--color-gray-400)">No flash sales found.</p>';}
+}
+
+async function fetchAllProductsSimple(){const r=await apiFetch(API+'/products?limit=500');return r.success?r.data:[];}
+
+function flashSaleForm(id){
+  const isEdit=!!id;let allProducts=[];
+  fetchAllProductsSimple().then(pps=>{allProducts=pps;
+    const loadForm=(sale)=>{
+      openModal(`<h2>${isEdit?'Edit':'Add'} Flash Sale</h2>
+        <form id="flashSaleForm" style="display:flex;flex-direction:column;gap:12px">
+          <div class="form-group"><label>Sale Name</label><input class="form-input" id="fsName" value="${sale?.name||''}" required></div>
+          <div class="form-group"><label>Description</label><input class="form-input" id="fsDesc" value="${sale?.description||''}"></div>
+          <div class="form-row"><div class="form-group"><label>Discount Type</label><select class="form-input" id="fsType"><option value="percentage" ${sale?.discountType==='percentage'?'selected':''}>Percentage</option><option value="fixed" ${sale?.discountType==='fixed'?'selected':''}>Fixed (₦)</option></select></div>
+          <div class="form-group"><label>Discount Value</label><input class="form-input" id="fsValue" type="number" value="${sale?.discountValue||''}" required></div></div>
+          <div class="form-group"><label>Products</label><select class="form-input" id="fsProducts" multiple size="5">
+            ${allProducts.map(p=>'<option value="'+p._id+'"'+(sale?.products?.includes(p._id)||sale?.products?.find?.(x=>x._id===p._id)?' selected':'')+'>'+p.name+'</option>').join('')}
+          </select><small style="color:var(--color-gray-400)">Hold Ctrl to select multiple</small></div>
+          <div class="form-row"><div class="form-group"><label>Start Date</label><input class="form-input" id="fsStart" type="datetime-local" value="${sale?.startDate?new Date(sale.startDate).toISOString().slice(0,16):''}" required></div>
+          <div class="form-group"><label>End Date</label><input class="form-input" id="fsEnd" type="datetime-local" value="${sale?.endDate?new Date(sale.endDate).toISOString().slice(0,16):''}" required></div></div>
+          <div class="form-group"><label>Banner Image URL</label><input class="form-input" id="fsBanner" value="${sale?.bannerImage||''}"></div>
+          <div class="form-row"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="fsActive" ${sale?.isActive!==false?'checked':''}> Active</label></div>
+          <div class="modal-actions"><button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">${isEdit?'Update':'Create'} Flash Sale</button></div>
+        </form>`);
+      document.getElementById('flashSaleForm').addEventListener('submit',async(e)=>{
+        e.preventDefault();
+        const sel=document.getElementById('fsProducts');const prods=Array.from(sel.selectedOptions).map(o=>o.value);
+        const body={name:document.getElementById('fsName').value,description:document.getElementById('fsDesc').value,discountType:document.getElementById('fsType').value,discountValue:Number(document.getElementById('fsValue').value),products:prods,startDate:new Date(document.getElementById('fsStart').value).toISOString(),endDate:new Date(document.getElementById('fsEnd').value).toISOString(),bannerImage:document.getElementById('fsBanner').value,isActive:document.getElementById('fsActive').checked};
+        const url=isEdit?API+'/flash-sales/'+id:API+'/flash-sales';const method=isEdit?'PUT':'POST';
+        const r=await apiFetch(url,{method,body:JSON.stringify(body)});
+        if(r.success){closeModal();toast(isEdit?'Flash sale updated':'Flash sale created');loadSection('flash-sales');}else{toast(r.message||'Error');}
+      });
+    };
+    if(isEdit){apiFetch(API+'/flash-sales/'+id).then(r=>r.success&&loadForm(r.data));}else loadForm(null);
+  });
+}
+
+async function deleteFlashSale(id){if(!confirm('Delete this flash sale?'))return;const r=await apiFetch(API+'/flash-sales/'+id,{method:'DELETE'});if(r.success){toast('Flash sale deleted');loadSection('flash-sales');}else{toast(r.message||'Error');}}
+
+async function renderAnnouncements(el){
+  let html=`<div class="admin-header"><h1>Announcements</h1><button class="btn btn-primary btn-sm" onclick="announcementForm()">+ Add Announcement</button></div>`;
+  const d=await apiFetch(API+'/announcements');
+  if(d.success&&d.data?.length){let t='<div style="overflow-x:auto"><table class="admin-table"><tr><th>Text</th><th>Link</th><th>Active</th><th>Style</th><th></th></tr>';
+    d.data.forEach(a=>{t+=`<tr><td style="font-weight:500;max-width:250px;overflow:hidden;text-overflow:ellipsis">${a.text}</td>
+      <td style="font-size:0.8rem">${a.link?'<a href="'+a.link+'" target="_blank">'+a.linkText||a.link+'</a>':'—'}</td>
+      <td>${a.isActive!==false?'✓':'✗'}</td>
+      <td><span style="display:inline-block;width:12px;height:12px;background:${a.backgroundColor||'#000'};border-radius:2px;vertical-align:middle"></span> ${a.backgroundColor||'#000'}</td>
+      <td><button class="btn btn-outline btn-xs" onclick="announcementForm('${a._id}')">Edit</button> <button class="btn btn-outline btn-xs" style="color:#dc2626" onclick="deleteAnnouncement('${a._id}')">Del</button></td></tr>`;});
+    t+='</table></div>';el.innerHTML=html+t;
+  }else{el.innerHTML=html+'<p style="color:var(--color-gray-400)">No announcements found.</p>';}
+}
+
+function announcementForm(id){
+  const isEdit=!!id;
+  openModal(`<h2>${isEdit?'Edit':'Add'} Announcement</h2>
+    <form id="announcementForm" style="display:flex;flex-direction:column;gap:12px">
+      <div class="form-group"><label>Announcement Text</label><input class="form-input" id="aText" required placeholder="Free shipping on orders over N50,000"></div>
+      <div class="form-row"><div class="form-group"><label>Link URL</label><input class="form-input" id="aLink" placeholder="/shop"></div>
+      <div class="form-group"><label>Link Text</label><input class="form-input" id="aLinkText" placeholder="Shop Now"></div></div>
+      <div class="form-row"><div class="form-group"><label>Background Color</label><input class="form-input" id="aBg" type="color" value="#000000"></div>
+      <div class="form-group"><label>Text Color</label><input class="form-input" id="aColor" type="color" value="#ffffff"></div></div>
+      <div class="form-row"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="aActive" checked> Active</label></div>
+      <div class="modal-actions"><button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">${isEdit?'Update':'Create'} Announcement</button></div>
+    </form>`);
+  if(isEdit){
+    apiFetch(API+'/announcements/'+id).then(r=>{if(r.success){const a=r.data;document.getElementById('aText').value=a.text;document.getElementById('aLink').value=a.link||'';document.getElementById('aLinkText').value=a.linkText||'';document.getElementById('aBg').value=a.backgroundColor||'#000000';document.getElementById('aColor').value=a.textColor||'#ffffff';document.getElementById('aActive').checked=a.isActive!==false;}});
+  }
+  document.getElementById('announcementForm').addEventListener('submit',async(e)=>{
+    e.preventDefault();
+    const body={text:document.getElementById('aText').value,link:document.getElementById('aLink').value||undefined,linkText:document.getElementById('aLinkText').value||undefined,backgroundColor:document.getElementById('aBg').value,textColor:document.getElementById('aColor').value,isActive:document.getElementById('aActive').checked};
+    const url=isEdit?API+'/announcements/'+id:API+'/announcements';const method=isEdit?'PUT':'POST';
+    const r=await apiFetch(url,{method,body:JSON.stringify(body)});
+    if(r.success){closeModal();toast(isEdit?'Announcement updated':'Announcement created');loadSection('announcements');}else{toast(r.message||'Error');}
+  });
+}
+
+async function deleteAnnouncement(id){if(!confirm('Delete this announcement?'))return;const r=await apiFetch(API+'/announcements/'+id,{method:'DELETE'});if(r.success){toast('Announcement deleted');loadSection('announcements');}else{toast(r.message||'Error');}}
+
+async function renderBanners(el){
+  let html=`<div class="admin-header"><h1>Banners</h1><button class="btn btn-primary btn-sm" onclick="bannerForm()">+ Add Banner</button></div>`;
+  const d=await apiFetch(API+'/banners');
+  if(d.success&&d.data?.length){let t='<div style="overflow-x:auto"><table class="admin-table"><tr><th>Image</th><th>Title</th><th>Subtitle</th><th>Link</th><th>Active</th><th></th></tr>';
+    d.data.forEach(b=>{t+=`<tr><td><div style="width:60px;height:34px;background:var(--color-gray-50);overflow:hidden"><img src="${b.image||''}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'"></div></td>
+      <td>${b.title||'—'}</td><td style="font-size:0.8rem">${b.subtitle||''}</td><td style="font-size:0.8rem">${b.link||'—'}</td><td>${b.isActive!==false?'✓':'✗'}</td>
+      <td><button class="btn btn-outline btn-xs" onclick="bannerForm('${b._id}')">Edit</button> <button class="btn btn-outline btn-xs" style="color:#dc2626" onclick="deleteBanner('${b._id}')">Del</button></td></tr>`;});
+    t+='</table></div>';el.innerHTML=html+t;
+  }else{el.innerHTML=html+'<p style="color:var(--color-gray-400)">No banners found.</p>';}
+}
+
+function bannerForm(id){
+  const isEdit=!!id;
+  openModal(`<h2>${isEdit?'Edit':'Add'} Banner</h2>
+    <form id="bannerForm" style="display:flex;flex-direction:column;gap:12px">
+      <div class="form-row"><div class="form-group"><label>Title</label><input class="form-input" id="bTitle"></div>
+      <div class="form-group"><label>Subtitle</label><input class="form-input" id="bSub"></div></div>
+      <div class="form-group"><label>Description</label><textarea class="form-input" id="bDesc" rows="2"></textarea></div>
+      <div class="form-row"><div class="form-group"><label>Image URL</label><input class="form-input" id="bImage" placeholder="https://..."></div>
+      <div class="form-group"><label>Link URL</label><input class="form-input" id="bLink" placeholder="/shop"></div></div>
+      <div class="form-row"><div class="form-group"><label>Button Text</label><input class="form-input" id="bBtn" value="Shop Now"></div>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:24px"><input type="checkbox" id="bActive" checked> Active</label></div>
+      <div class="modal-actions"><button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">${isEdit?'Update':'Create'} Banner</button></div>
+    </form>`);
+  if(isEdit){
+    apiFetch(API+'/banners/'+id).then(r=>{if(r.success){const b=r.data;document.getElementById('bTitle').value=b.title||'';document.getElementById('bSub').value=b.subtitle||'';document.getElementById('bDesc').value=b.description||'';document.getElementById('bImage').value=b.image||'';document.getElementById('bLink').value=b.link||'';document.getElementById('bBtn').value=b.buttonText||'';document.getElementById('bActive').checked=b.isActive!==false;}});
+  }
+  document.getElementById('bannerForm').addEventListener('submit',async(e)=>{
+    e.preventDefault();
+    const body={title:document.getElementById('bTitle').value,subtitle:document.getElementById('bSub').value,description:document.getElementById('bDesc').value,image:document.getElementById('bImage').value,link:document.getElementById('bLink').value,buttonText:document.getElementById('bBtn').value,isActive:document.getElementById('bActive').checked};
+    const url=isEdit?API+'/banners/'+id:API+'/banners';const method=isEdit?'PUT':'POST';
+    const r=await apiFetch(url,{method,body:JSON.stringify(body)});
+    if(r.success){closeModal();toast(isEdit?'Banner updated':'Banner created');loadSection('banners');}else{toast(r.message||'Error');}
+  });
+}
+
+async function deleteBanner(id){if(!confirm('Delete this banner?'))return;const r=await apiFetch(API+'/banners/'+id,{method:'DELETE'});if(r.success){toast('Banner deleted');loadSection('banners');}else{toast(r.message||'Error');}}
+
+function signOut(){if(window.Clerk)Clerk.signOut();else window.location.href='/';}
+document.addEventListener('DOMContentLoaded',()=>{
+  const s=window.location.pathname.split('/admin')[1]?.replace(/^\//,'')||'dashboard';
+  if(['dashboard','products','orders','customers','coupons','categories','featured','flash-sales','announcements','banners'].includes(s))switchSection(s);else switchSection('dashboard');
+  document.querySelectorAll('.admin-nav-item').forEach(el=>{el.addEventListener('click',()=>switchSection(el.dataset.section));});
+});
+</script>
+<script src="/js/main.js"></script>
+</body>
+</html>

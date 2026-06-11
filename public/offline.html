@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline — SOLLENE</title>
+  <meta name="description" content="You're offline. Check your connection and try again.">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .offline-page { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; text-align: center; padding: 2rem; }
+    .offline-page .logo { font-family: 'Playfair Display', Georgia, serif; font-size: 2.5rem; font-weight: 700; letter-spacing: 2px; margin-bottom: 2rem; text-decoration: none; color: #000; }
+    .offline-icon { margin-bottom: 1.5rem; color: #999; }
+    .offline-page h1 { font-size: 1.75rem; margin-bottom: 0.75rem; }
+    .offline-page p { color: #666; margin-bottom: 2rem; max-width: 400px; }
+    .offline-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+  </style>
+</head>
+<body>
+  <main class="offline-page">
+    <a href="/" class="logo">SOLLENE</a>
+    <div class="offline-icon">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="1" y1="1" x2="23" y2="23"/>
+        <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+        <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+        <path d="M10.71 5.05A16 16 0 0 1 22.56 9"/>
+        <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+        <line x1="12" y1="20" x2="12.01" y2="20"/>
+      </svg>
+    </div>
+    <h1>You're offline</h1>
+    <p>Check your connection and try again. Some features may be unavailable until you're back online.</p>
+    <div class="offline-actions">
+      <a href="/" class="btn btn-primary">Home</a>
+      <a href="/shop" class="btn btn-outline">Shop</a>
+    </div>
+  </main>
+</body>
+</html>

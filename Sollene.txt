@@ -1,0 +1,360 @@
+Build a modern, production-ready eCommerce website called **SOLLENE** for a small retail business that sells household items, clothing, deodorants, personal care products, and general lifestyle products.
+
+Brand Information:
+
+* Brand Name: SOLLENE
+* Domain: sollene.site
+* Tagline: Elevating Everyday Living
+* Brand Style: Premium, Minimal, Elegant, Trustworthy, Modern
+* The website should consistently display and reinforce the SOLLENE brand identity across all pages, emails, checkout flows, customer dashboards, and marketing sections.
+
+Tech Stack:
+
+* [x] Frontend: HTML, CSS, Vanilla JavaScript
+* [x] Backend: Node.js + Express
+* [x] Database: MongoDB
+* [x] Authentication: Clerk
+* [⚡] Payments: Paystack
+* [⚡] Emails: Resend
+* [⚡] Deployment: Vercel
+
+Design Theme:
+
+* [x] Premium black and white aesthetic
+* [x] Dominantly black with white accents
+* [x] Modern luxury retail feel
+* [x] Clean typography
+* [x] Smooth animations
+* [x] Fast loading
+* [x] Mobile-first responsive design
+* [x] Elegant micro-interactions
+* [x] Professional shopping experience similar to modern Shopify stores
+* [x] The website should feel like a premium lifestyle brand rather than a generic online store
+
+Core Goals:
+
+* [x] Extremely easy navigation
+* [x] Fast checkout process
+* [x] High conversion rate
+* [x] Trust-building UI
+* [x] Mobile optimized
+* [x] SEO friendly
+* [⚡] Accessible design
+* [x] Scalable architecture
+
+====================================
+1. PUBLIC PAGES
+
+Landing Page (/):
+  [x] Sticky navigation bar
+  [x] SOLLENE logo section
+  [x] Search bar
+  [x] Category navigation
+  [x] Hero section with CTA buttons
+  [x] Promotional banner
+  [x] Featured products section
+  [x] New arrivals section
+  [x] Best sellers section
+  [x] Categories showcase
+  [x] Why shop with us section
+  [x] Customer reviews section
+  [x] Newsletter signup
+  [x] FAQ section
+  [x] Footer with links
+  [x] Display brand messaging and trust indicators
+  [x] Include call-to-action sections encouraging users to shop products
+
+Product Listing Page (/shop):
+  [x] Product grid layout
+  [x] Search products
+  [x] Category filters
+  [x] Price filters
+  [x] Availability filters
+  [x] Sort by:
+    [x] Newest
+    [x] Price low-high
+    [x] Price high-low
+    [x] Best selling
+    [x] Featured
+  [x] Pagination
+  [x] Quick add to cart
+
+Product Details Page (/product/:slug):
+  [x] Product image gallery
+  [x] Zoom functionality
+  [x] Product information
+  [x] Price
+  [x] Discount badge
+  [x] Stock status
+  [x] Quantity selector
+  [x] Add to cart button
+  [x] Buy now button
+  [x] Product specifications
+  [x] Product description
+  [x] Related products
+  [x] Recently viewed products
+  [x] Customer reviews
+  [x] Share product button
+
+Categories Page (/categories):
+  [x] Household Items
+  [x] Clothing
+  [x] Deodorants
+  [x] Personal Care
+  [x] Featured Collections
+
+Search Page (/search):
+  [x] Real-time search
+  [x] Search suggestions
+  [x] Popular searches
+  [x] Search history
+
+====================================
+2. SHOPPING EXPERIENCE
+
+Shopping Cart (drawer):
+  [x] Add/remove products
+  [x] Update quantity
+  [x] Cart subtotal
+  [x] Shipping estimate
+  [x] Tax calculation
+  [x] Coupon code support
+  [x] Save for later
+  [x] Continue shopping button
+
+Wishlist:
+  [x] Save favorite products
+  [x] Move to cart
+  [x] Remove items
+
+Checkout Flow:
+  [x] Step 1: Customer information
+  [x] Step 2: Shipping address
+  [x] Step 3: Shipping method
+  [x] Step 4: Payment
+  [x] Step 5: Order confirmation
+
+Checkout Features:
+  [x] Guest checkout
+  [x] Clerk account checkout
+  [x] Paystack integration
+  [x] Order summary
+  [x] Shipping calculator
+  [x] Coupon support
+  [x] Automatic email confirmation
+  [x] Display SOLLENE branding throughout checkout
+  [x] Include trust badges and secure payment indicators
+
+====================================
+3. USER ACCOUNT
+
+Authentication:
+  [x] Clerk sign up page
+  [x] Clerk sign in page
+  [⚡] Social login support
+  [⚡] Password recovery
+
+Customer Dashboard:
+  [x] Profile management
+  [x] Order history
+  [x] Track orders
+  [x] Saved addresses
+  [x] Wishlist
+  [x] Account settings
+  [x] Notification preferences
+
+Orders:
+  [x] View all orders
+  [x] Order details page
+  [x] Download invoice
+  [x] Order status tracking
+
+Order Status Types: (defined in model)
+  [x] Pending, Paid, Processing, Shipped, Delivered, Cancelled, Refunded
+
+====================================
+4. ADMIN PANEL
+
+Admin Dashboard:
+  [x] Total sales
+  [x] Revenue analytics
+  [x] Orders overview
+  [x] Customer overview
+  [x] Product statistics
+  [x] Inventory statistics
+
+Product Management:
+  [x] Create products
+  [x] Edit products
+  [x] Delete products
+  [x] Upload multiple images
+  [x] Manage stock
+  [x] Product categories
+  [x] Product variants
+
+Order Management:
+  [x] View orders
+  [x] Update status
+  [x] Manage refunds
+  [x] Generate invoices
+
+Customer Management:
+  [x] View customers
+  [x] Customer profiles
+  [x] Purchase history
+
+Coupon Management:
+  [x] View coupons
+  [x] Percentage discounts
+  [x] Fixed discounts
+  [x] Expiration dates
+  [x] Usage limits
+
+Content Management:
+  [x] View banners
+  [x] Promotions
+  [x] Featured products
+  [x] Announcements
+
+====================================
+5. EMAIL SYSTEM (RESEND)
+
+Send automated emails for:
+  [x] Welcome email
+  [x] Account creation
+  [⚡] Password reset
+  [x] Order confirmation
+  [x] Payment confirmation
+  [x] Shipping update
+  [x] Delivered notification
+  [x] Abandoned cart reminder
+  [x] Newsletter subscription
+
+All emails should:
+  [x] Use SOLLENE branding
+  [x] Include the sollene.site domain where appropriate
+  [x] Be mobile responsive
+  [x] Match the black and white premium design theme
+
+====================================
+6. PAYSTACK INTEGRATION
+
+Support:
+  [x] Card payments
+  [x] Bank transfers
+  [x] Mobile payments
+  [x] Payment verification
+  [x] Secure webhook handling
+  [x] Failed payment recovery
+
+====================================
+7. DATABASE STRUCTURE
+
+Collections: (all models created)
+  [x] Users
+  [x] Products
+  [x] Categories
+  [x] Orders
+  [x] OrderItems (embedded in Order)
+  [x] Addresses
+  [x] Reviews
+  [x] Coupons
+  [x] Wishlists
+  [x] Notifications
+  [x] Banners
+  [x] NewsletterSubscribers
+
+====================================
+8. SEO
+
+Implement:
+  [x] Dynamic meta tags
+  [x] Open Graph tags
+  [x] Structured data (JSON-LD)
+  [x] XML sitemap
+  [x] robots.txt
+  [x] Canonical URLs
+  [x] Product SEO optimization
+  [x] Category SEO optimization
+
+Use SOLLENE and sollene.site in SEO metadata where appropriate.
+
+====================================
+9. ANIMATIONS
+
+Use smooth animations:
+  [x] Page transitions
+  [x] Hover effects
+  [x] Product card interactions
+  [x] Button animations
+  [x] Cart drawer animations
+  [x] Loading skeletons
+  [x] Fade-ins
+  [x] Slide animations
+  [x] Scroll reveal effects
+
+Animations should feel premium and modern, not distracting.
+
+====================================
+10. PERFORMANCE
+
+Requirements:
+  [x] Lazy load images
+  [⚡] Optimized assets
+  [x] Fast API responses
+  [⚡] Caching where appropriate
+  [x] Mobile optimization
+  [⚡] Lighthouse score target 90+
+
+====================================
+11. SECURITY
+
+Implement:
+  [x] Clerk authentication security (middleware)
+  [x] Input validation (express-validator)
+  [x] Rate limiting (express-rate-limit)
+  [x] MongoDB query protection (Mongoose)
+  [x] Secure Paystack webhooks
+  [⚡] CSRF protection
+  [x] XSS protection (helmet)
+  [x] Environment variable protection (.env)
+
+====================================
+12. EXTRA FEATURES
+
+Add:
+  [x] Dark mode ready architecture (CSS variables)
+  [x] Product reviews and ratings
+  [x] Recently viewed products
+  [x] Newsletter system (API + frontend)
+  [x] Contact page
+  [x] About page
+  [x] Privacy Policy page
+  [x] Terms & Conditions page
+  [x] Return Policy page
+  [x] Shipping Policy page
+  [x] Live inventory updates
+  [x] Featured collections
+  [x] Flash sales
+  [x] Product badges (New, Trending, Best Seller, Sale)
+  [x] Announcement bar
+  [x] Social media links
+  [x] WhatsApp support button
+  [x] Back-to-top button
+  [x] Cookie consent banner
+  [x] PWA readiness
+  [x] Offline fallback page
+  [x] Analytics integration hooks
+  [x] Error tracking hooks
+
+====================================
+UI INSPIRATION
+
+Blend inspiration from:
+  * Apple
+  * Nike
+  * Zara
+  * Shopify premium themes
+  * Minimal luxury fashion stores
+
+The final product should feel premium, trustworthy, elegant, modern, fast, and optimized for mobile users. Prioritize user experience, clean architecture, scalability, maintainability, and conversion optimization while maintaining a consistent SOLLENE brand identity throughout the entire platform.

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — SOLLENE</title>
+  <link rel="canonical" href="https://sollene.site/checkout">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .checkout-page { background: var(--color-gray-50); min-height: 100vh; padding: 32px 0; }
+    .checkout-grid { display: grid; grid-template-columns: 1fr 380px; gap: 32px; align-items: start; }
+    .checkout-section { background: var(--color-white); border: 1px solid var(--color-gray-100); padding: 28px; margin-bottom: 20px; }
+    .checkout-section h2 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--color-gray-100); }
+    .checkout-summary { background: var(--color-white); border: 1px solid var(--color-gray-100); padding: 28px; position: sticky; top: calc(var(--header-height) + 32px); }
+    .checkout-summary h2 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--color-gray-100); }
+    .summary-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--color-gray-50); }
+    .summary-item-img { width: 56px; height: 56px; flex-shrink: 0; background: var(--color-gray-50); overflow: hidden; }
+    .summary-item-img img { width: 100%; height: 100%; object-fit: cover; }
+    .summary-item-info { flex: 1; font-size: 0.85rem; }
+    .summary-item-name { font-weight: 500; margin-bottom: 2px; }
+    .summary-item-qty { color: var(--color-gray-400); font-size: 0.8rem; }
+    .summary-item-price { font-weight: 600; }
+    .summary-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 0.9rem; color: var(--color-gray-600); }
+    .summary-row.total { font-size: 1.1rem; font-weight: 700; color: var(--color-black); border-top: 2px solid var(--color-black); padding-top: 12px; margin-top: 8px; }
+    .coupon-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    .coupon-row input { flex: 1; padding: 10px 12px; border: 1px solid var(--color-gray-200); font-size: 0.85rem; }
+    .coupon-row input:focus { border-color: var(--color-black); outline: none; }
+    .coupon-applied { font-size: 0.8rem; color: #059669; padding: 4px 0; }
+    .checkout-error { background: #fee2e2; color: #dc2626; padding: 12px 16px; font-size: 0.85rem; margin-bottom: 16px; display: none; }
+    .stepper { display: flex; margin-bottom: 32px; }
+    .step { flex: 1; text-align: center; font-size: 0.8rem; color: var(--color-gray-400); position: relative; }
+    .step.active { color: var(--color-black); font-weight: 600; }
+    .step.done { color: #059669; }
+    .step-num { display: inline-flex; width: 28px; height: 28px; border-radius: 50%; align-items: center; justify-content: center; border: 2px solid var(--color-gray-200); margin-bottom: 6px; font-size: 0.8rem; font-weight: 600; }
+    .step.active .step-num { border-color: var(--color-black); background: var(--color-black); color: var(--color-white); }
+    .step.done .step-num { border-color: #059669; background: #059669; color: var(--color-white); }
+    .order-confirm { text-align: center; padding: 40px 0; }
+    .order-confirm svg { margin-bottom: 16px; }
+    .order-confirm h2 { font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 8px; }
+    .order-confirm p { color: var(--color-gray-500); margin-bottom: 24px; }
+    @media (max-width: 768px) { .checkout-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body class="checkout-page">
+  <header class="header" id="header">
+    <div class="header-inner">
+      <a href="/" class="logo">SOLLENE</a>
+      <span style="font-size:0.85rem;color:var(--color-gray-400);letter-spacing:1px;text-transform:uppercase">Checkout</span>
+      <a href="/cart" class="btn btn-outline btn-sm" onclick="event.preventDefault();history.back()">Back</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="stepper" id="checkoutStepper">
+      <div class="step active" data-step="1"><div class="step-num">1</div><div>Information</div></div>
+      <div class="step" data-step="2"><div class="step-num">2</div><div>Payment</div></div>
+      <div class="step" data-step="3"><div class="step-num">3</div><div>Confirmation</div></div>
+    </div>
+
+    <div class="checkout-grid">
+      <div id="checkoutMain">
+        <div style="text-align:center;padding:40px;color:var(--color-gray-400)">Loading checkout...</div>
+      </div>
+      <div>
+        <div class="checkout-summary" id="checkoutSummary">
+          <h2>Order Summary</h2>
+          <div id="summaryItems"></div>
+          <div id="summaryCoupon">
+            <div class="coupon-row">
+              <input type="text" id="couponInput" placeholder="Coupon code" autocomplete="off">
+              <button class="btn btn-outline btn-sm" onclick="applyCoupon()">Apply</button>
+            </div>
+            <div id="couponMsg"></div>
+          </div>
+          <div id="summaryTotals"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = '/api';
+    let cart = [];
+    let couponData = null;
+    let currentStep = 1;
+    let orderRef = null;
+    let PAYSTACK_PUBLIC_KEY = '';
+
+    async function initConfig() {
+      const res = await apiFetch('/api/config');
+      PAYSTACK_PUBLIC_KEY = res?.paystackPublicKey || '';
+    }
+
+    function getCart() { return JSON.parse(localStorage.getItem('sollene_cart') || '[]'); }
+
+    async function apiFetch(url, opts = {}) {
+      const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+      return await res.json();
+    }
+
+    function formatPrice(n) { return '\u20A6' + Number(n).toLocaleString('en-US'); }
+
+    function renderSummary() {
+      cart = getCart();
+      if (!cart.length) { window.location.href = '/shop'; return; }
+      const itemsEl = document.getElementById('summaryItems');
+      itemsEl.innerHTML = cart.map(i => `
+        <div class="summary-item">
+          <div class="summary-item-img"><img src="${i.image || ''}" onerror="this.style.display='none'"></div>
+          <div class="summary-item-info">
+            <div class="summary-item-name">${i.name}</div>
+            <div class="summary-item-qty">Qty: ${i.quantity}</div>
+          </div>
+          <div class="summary-item-price">${formatPrice(i.price * i.quantity)}</div>
+        </div>
+      `).join('');
+      updateTotals();
+    }
+
+    function updateTotals() {
+      const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+      const discount = couponData ? couponData.discount : 0;
+      const shipping = subtotal >= 50000 ? 0 : 3500;
+      const tax = Math.round((subtotal - discount) * 0.075);
+      const total = subtotal - discount + tax + shipping;
+      const el = document.getElementById('summaryTotals');
+      el.innerHTML = `
+        <div class="summary-row"><span>Subtotal</span><span>${formatPrice(subtotal)}</span></div>
+        ${discount ? `<div class="summary-row" style="color:#059669"><span>Discount${couponData?.coupon?.code ? ' ('+couponData.coupon.code+')' : ''}</span><span>-${formatPrice(discount)}</span></div>` : ''}
+        <div class="summary-row"><span>Tax (VAT 7.5%)</span><span>${formatPrice(tax)}</span></div>
+        <div class="summary-row"><span>Shipping</span><span>${shipping === 0 ? 'Free' : formatPrice(shipping)}</span></div>
+        <div class="summary-row total"><span>Total</span><span>${formatPrice(total)}</span></div>
+        <div style="font-size:0.75rem;color:var(--color-gray-400);margin-top:4px;text-align:right">${shipping > 0 ? 'Free shipping on orders over \u20A650,000' : ''}</div>
+      `;
+    }
+
+    async function applyCoupon() {
+      const code = document.getElementById('couponInput').value.trim();
+      if (!code) return;
+      const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+      const res = await fetch(`${API}/admin/coupons/validate`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, orderTotal: subtotal }),
+      });
+      const d = await res.json();
+      const msg = document.getElementById('couponMsg');
+      if (d.success) {
+        couponData = d.data;
+        msg.innerHTML = `<div class="coupon-applied">Coupon applied! -${formatPrice(couponData.discount)}</div>`;
+        updateTotals();
+      } else {
+        couponData = null;
+        msg.innerHTML = `<div style="font-size:0.8rem;color:#dc2626">${d.message || 'Invalid coupon'}</div>`;
+        updateTotals();
+      }
+    }
+
+    function renderStep1() {
+      const el = document.getElementById('checkoutMain');
+      currentStep = 1;
+      updateStepper();
+      el.innerHTML = `
+        <div class="checkout-section">
+          <h2>Shipping Information</h2>
+          <div class="checkout-error" id="checkoutError"></div>
+          <form class="auth-form" id="shippingForm">
+            <div class="form-row">
+              <div class="form-group"><label>Full Name</label><input class="form-input" id="sFullName" required></div>
+              <div class="form-group"><label>Phone</label><input class="form-input" id="sPhone" type="tel" required></div>
+            </div>
+            <div class="form-group"><label>Email</label><input class="form-input" id="sEmail" type="email" required></div>
+            <div class="form-group"><label>Street Address</label><input class="form-input" id="sStreet" required></div>
+            <div class="form-row">
+              <div class="form-group"><label>City</label><input class="form-input" id="sCity" required></div>
+              <div class="form-group"><label>State</label><input class="form-input" id="sState" required></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>ZIP Code</label><input class="form-input" id="sZip" required></div>
+              <div class="form-group"><label>Country</label><input class="form-input" id="sCountry" value="Nigeria"></div>
+            </div>
+            <div class="form-group"><label>Order Notes (optional)</label><textarea class="form-input" id="sNotes" rows="3" style="resize:vertical"></textarea></div>
+            <button type="submit" class="btn btn-primary btn-block">Continue to Payment</button>
+          </form>
+        </div>
+      `;
+      document.getElementById('shippingForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errEl = document.getElementById('checkoutError');
+        errEl.style.display = 'none';
+        const shippingAddress = {
+          fullName: document.getElementById('sFullName').value,
+          phone: document.getElementById('sPhone').value,
+          email: document.getElementById('sEmail').value,
+          street: document.getElementById('sStreet').value,
+          city: document.getElementById('sCity').value,
+          state: document.getElementById('sState').value,
+          zipCode: document.getElementById('sZip').value,
+          country: document.getElementById('sCountry').value,
+        };
+        const items = getCart().map(i => ({ _id: i._id, name: i.name, price: i.price, quantity: i.quantity, image: i.image }));
+        try {
+          const res = await apiFetch(`${API}/checkout/create`, {
+            method: 'POST',
+            body: JSON.stringify({
+              items,
+              shippingAddress,
+              couponCode: couponData?.coupon?.code || null,
+              notes: document.getElementById('sNotes').value,
+            }),
+          });
+          if (res.success) {
+            orderRef = res.data.paymentReference;
+            renderStep2(res.data);
+          } else {
+            errEl.textContent = res.message || 'Failed to create order';
+            errEl.style.display = 'block';
+          }
+        } catch (err) {
+          errEl.textContent = 'Network error. Please try again.';
+          errEl.style.display = 'block';
+        }
+      });
+    }
+
+    async function renderStep2(orderData) {
+      const el = document.getElementById('checkoutMain');
+      currentStep = 2;
+      updateStepper();
+      const total = orderData.amount;
+      el.innerHTML = `
+        <div class="checkout-section">
+          <h2>Payment</h2>
+          <div class="checkout-error" id="payError" style="display:none"></div>
+          <p style="font-size:0.9rem;color:var(--color-gray-500);margin-bottom:20px">Secure payment via Paystack. Your payment details are encrypted and processed securely.</p>
+          <div style="padding:20px;background:#fafafa;margin-bottom:20px;text-align:center">
+            <div style="font-size:0.8rem;color:var(--color-gray-400);margin-bottom:4px">Order Reference</div>
+            <div style="font-weight:600;font-size:0.9rem">${orderRef}</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:0.9rem;color:var(--color-gray-500);margin-bottom:12px">Total to pay: <strong style="font-size:1.25rem">${formatPrice(total)}</strong></div>
+            <button class="btn btn-primary" onclick="payWithPaystack('${orderRef}', ${total})" id="payBtn">Pay with Paystack</button>
+            <p style="font-size:0.8rem;color:var(--color-gray-400);margin-top:12px">We accept Visa, Mastercard, Verve, and bank transfers</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function payWithPaystack(reference, amount) {
+      if (typeof PaystackPop === 'undefined') {
+        document.getElementById('payError').textContent = 'Payment system loading. Please try again.';
+        document.getElementById('payError').style.display = 'block';
+        return;
+      }
+      const handler = PaystackPop.setup({
+        key: PAYSTACK_PUBLIC_KEY,
+        email: document.getElementById('sEmail')?.value || '',
+        amount: Math.round(amount * 100),
+        ref: reference,
+        callback: () => { renderStep3(); },
+        onClose: () => {
+          document.getElementById('payError').textContent = 'Payment window closed. You can retry.';
+          document.getElementById('payError').style.display = 'block';
+        },
+      });
+      handler.openIframe();
+    }
+
+    async function renderStep3() {
+      const el = document.getElementById('checkoutMain');
+      currentStep = 3;
+      updateStepper();
+      localStorage.removeItem('sollene_cart');
+      el.innerHTML = `
+        <div class="checkout-section order-confirm">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          <h2>Order Placed!</h2>
+          <p>Thank you for your purchase. Your order has been placed successfully.<br>Reference: <strong>${orderRef}</strong></p>
+          <p style="font-size:0.85rem;color:var(--color-gray-400)">A confirmation email has been sent to your email address.</p>
+          <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+            <a href="/account/orders" class="btn btn-primary">View Orders</a>
+            <a href="/shop" class="btn btn-outline">Continue Shopping</a>
+          </div>
+        </div>
+      `;
+    }
+
+    function updateStepper() {
+      document.querySelectorAll('.step').forEach(s => {
+        const step = Number(s.dataset.step);
+        s.classList.toggle('active', step === currentStep);
+        s.classList.toggle('done', step < currentStep);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await initConfig();
+      renderSummary();
+      renderStep1();
+    });
+  </script>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

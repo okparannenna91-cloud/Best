@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categories — SOLLENE</title>
+  <meta name="description" content="Browse SOLLENE categories: Household items, clothing, deodorants, personal care & more.">
+  <meta property="og:title" content="Categories — SOLLENE">
+  <meta property="og:description" content="Explore our curated collections.">
+  <link rel="canonical" href="https://sollene.site/categories">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .categories-page { padding: 40px 0; }
+    .categories-hero { text-align: center; padding: 40px 0; }
+    .categories-hero h1 { font-family: var(--font-display); font-size: 2rem; margin-bottom: 8px; }
+    .categories-hero p { color: var(--color-gray-500); max-width: 480px; margin: 0 auto; }
+    .category-card-lg { display: flex; align-items: center; gap: 32px; padding: 24px; border: 1px solid var(--color-gray-100); margin-bottom: 16px; transition: var(--transition-base); cursor: pointer; }
+    .category-card-lg:hover { border-color: var(--color-black); }
+    .category-card-lg img { width: 120px; height: 120px; object-fit: cover; flex-shrink: 0; }
+    .category-card-lg h3 { font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 4px; }
+    .category-card-lg p { font-size: 0.85rem; color: var(--color-gray-500); margin-bottom: 12px; }
+    .category-count { font-size: 0.8rem; color: var(--color-gray-400); }
+    @media (max-width: 600px) { .category-card-lg { flex-direction: column; text-align: center; } .category-card-lg img { width: 80px; height: 80px; } }
+  </style>
+</head>
+<body>
+  <header class="header" id="header"><div class="header-inner"><a href="/" class="logo">SOLLENE</a><nav class="nav"><ul class="nav-list"><li><a href="/" class="nav-link">Home</a></li><li><a href="/shop" class="nav-link">Shop</a></li></ul></nav><div class="header-actions"><button class="header-icon cart-icon" id="cartToggle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span class="badge cart-badge" id="cartBadge">0</span></button></div></div></header>
+  <main class="container categories-page">
+    <div class="categories-hero"><h1>Shop by Category</h1><p>Explore our curated collections designed for every aspect of modern living.</p></div>
+    <div id="categoriesList"><div style="text-align:center;padding:60px 0;color:var(--color-gray-400)">Loading...</div></div>
+  </main>
+  <script>
+    async function loadCategories() {
+      const res = await fetch('/api/categories');
+      const d = await res.json();
+      const el = document.getElementById('categoriesList');
+      if (!d.success || !d.data?.length) { el.innerHTML = '<p style="text-align:center;color:var(--color-gray-400);padding:40px 0">No categories found.</p>'; return; }
+      el.innerHTML = d.data.map(c => `<div class="category-card-lg" onclick="window.location='/shop?category=${c._id}'"><img src="${c.image || ''}" onerror="this.style.display='none'" alt="${c.name}"><div><h3>${c.name}</h3><p>${c.description || 'Explore our collection of '+c.name.toLowerCase()}</p><span class="category-count">Shop ${c.name} →</span></div></div>`).join('');
+    }
+    document.addEventListener('DOMContentLoaded', loadCategories);
+  </script>
+  <script src="/js/main.js"></script>
+</body>
+</html>
