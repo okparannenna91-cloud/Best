@@ -28,7 +28,7 @@ app.use(helmet({
       imgSrc: ["'self'", "data:"],
       objectSrc: ["'none'"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrcAttr: ["'none'"],
+
       workerSrc: ["'self'", "blob:"],
       styleSrc: ["'self'", "https:", "'unsafe-inline'"],
       upgradeInsecureRequests: [],
