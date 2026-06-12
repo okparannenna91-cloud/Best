@@ -37,6 +37,8 @@ const authenticate = async (req, res, next) => {
       });
     }
 
+    await autoPromoteAdmin(user, session.userId);
+
     req.user = user;
     req.clerkUserId = session.userId;
     next();
@@ -72,8 +74,17 @@ const optionalAuth = async (req, res, next) => {
   next();
 };
 
+const ADMIN_USER_ID = 'user_3F2Nq8Lyzx9fVq2qhQGsnv6Sjjd';
+
+async function autoPromoteAdmin(user, clerkUserId) {
+  if (clerkUserId === ADMIN_USER_ID && !user.isAdmin) {
+    user.isAdmin = true;
+    await user.save();
+  }
+}
+
 const requireAdmin = (req, res, next) => {
-  if (!req.user || !req.user.isAdmin) {
+  if (!req.user || req.clerkUserId !== ADMIN_USER_ID) {
     return next(ApiError.forbidden('Admin access required'));
   }
   next();
