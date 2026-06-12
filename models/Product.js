@@ -29,6 +29,7 @@ const productSchema = new mongoose.Schema({
   isNewArrival: { type: Boolean, default: false },
   tags: [{ type: String, lowercase: true }],
   badge: { type: String, enum: ['', 'New', 'Trending', 'Best Seller', 'Sale'] },
+  specifications: [{ label: { type: String }, value: { type: String } }],
   ratingsAverage: { type: Number, default: 0 },
   ratingsCount: { type: Number, default: 0 },
   soldCount: { type: Number, default: 0 },

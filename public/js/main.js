@@ -5,6 +5,9 @@
 
 const API_BASE = '/api';
 const formatPrice = (n) => '₦' + Number(n).toLocaleString('en-US');
+function getImgUrl(img) { if (!img) return ''; if (typeof img === 'string') return img; return img.url || ''; }
+function getProductImage(product) { return product.images?.length ? getImgUrl(product.images[0]) : ''; }
+function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 async function fetchAPI(endpoint, options = {}) {
   try {
@@ -66,13 +69,13 @@ function renderProducts(containerId, products) {
     return `
       <div class="product-card fade-in" data-product-id="${p._id}" onclick="window.location='/product/${p.slug}'">
         <div class="product-card-image">
-          <img src="${p.images?.[0] || ''}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'">
-          ${p.badge ? `<span class="product-badge">${p.badge}</span>` : ''}
+          <img src="${getProductImage(p)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.style.display='none'">
+          ${p.badge ? `<span class="product-badge">${escapeHtml(p.badge)}</span>` : ''}
           ${p.comparePrice ? `<span class="product-badge" style="left:auto;right:12px;background:var(--color-white);color:var(--color-black);">${Math.round((1 - p.price / p.comparePrice) * 100)}% OFF</span>` : ''}
         </div>
         <div class="product-card-info">
-          <span class="product-card-category">${p.category?.name || ''}</span>
-          <span class="product-card-name">${p.name}</span>
+          <span class="product-card-category">${escapeHtml(p.category?.name || '')}</span>
+          <span class="product-card-name">${escapeHtml(p.name)}</span>
           <div class="product-card-rating">
             <span class="stars">${starHTML}</span>
             <span>(${p.ratingsCount || 0})</span>
@@ -93,9 +96,9 @@ function renderCategories(categories) {
 
   grid.innerHTML = categories.map((cat) => `
     <a href="/shop?category=${cat._id}" class="category-card fade-in">
-      <img src="${cat.image || ''}" alt="${cat.name}" loading="lazy" onerror="this.style.display='none'">
+      <img src="${cat.image || ''}" alt="${escapeHtml(cat.name)}" loading="lazy" onerror="this.style.display='none'">
       <div class="category-card-overlay"></div>
-      <span class="category-card-title">${cat.name}</span>
+      <span class="category-card-title">${escapeHtml(cat.name)}</span>
     </a>
   `).join('');
 }
@@ -107,12 +110,12 @@ function renderHeroSlides(banners) {
 
   slider.innerHTML = banners.map((b, i) => `
     <div class="hero-slide ${i === 0 ? 'active' : ''}">
-      <div class="hero-slide-bg" style="background-image:url('${b.image}')"></div>
+      <div class="hero-slide-bg" style="background-image:url('${String(b.image || '').replace(/'/g, '%27')}')"></div>
       <div class="hero-content">
-        ${b.title ? `<div class="hero-tag">${b.subtitle || 'Featured'}</div>` : ''}
-        <h1 class="hero-title">${b.title || 'SOLLENE'}</h1>
-        <p class="hero-text">${b.description || 'Elevating Everyday Living'}</p>
-        ${b.link ? `<a href="${b.link}" class="btn btn-outline" style="border-color:white;color:white;">${b.buttonText || 'Shop Now'}</a>` :
+        ${b.title ? `<div class="hero-tag">${escapeHtml(b.subtitle || 'Featured')}</div>` : ''}
+        <h1 class="hero-title">${escapeHtml(b.title || 'SOLLENE')}</h1>
+        <p class="hero-text">${escapeHtml(b.description || 'Elevating Everyday Living')}</p>
+        ${b.link ? `<a href="${String(b.link || '').replace(/'/g, '%27')}" class="btn btn-outline" style="border-color:white;color:white;">${escapeHtml(b.buttonText || 'Shop Now')}</a>` :
           `<a href="/shop" class="btn btn-outline" style="border-color:white;color:white;">Shop Now</a>`}
       </div>
     </div>
@@ -274,8 +277,8 @@ function initSearch() {
         if (d.success && d.data?.length) {
           suggestions.innerHTML = d.data.map(p => `<div class="search-suggestion-item" onclick="window.location='/product/${p.slug}'">
             <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--color-gray-50)">
-              ${p.images?.[0] ? '<img src="'+p.images[0]+'" style="width:36px;height:36px;object-fit:cover;border-radius:4px" onerror="this.style.display=\'none\'">' : ''}
-              <div><div style="font-size:0.85rem;font-weight:500">${p.name}</div><div style="font-size:0.8rem;color:var(--color-gray-400)">${formatPrice(p.price)}</div></div>
+              ${getProductImage(p) ? '<img src="'+getProductImage(p)+'" style="width:36px;height:36px;object-fit:cover;border-radius:4px" onerror="this.style.display=\'none\'">' : ''}
+              <div><div style="font-size:0.85rem;font-weight:500">${escapeHtml(p.name)}</div><div style="font-size:0.8rem;color:var(--color-gray-400)">${formatPrice(p.price)}</div></div>
             </div></div>`).join('');
         } else {
           suggestions.innerHTML = '<div style="padding:12px;font-size:0.85rem;color:var(--color-gray-400)">No products found</div>';
@@ -326,7 +329,7 @@ async function initAnnouncement() {
       bar.style.background = a.backgroundColor || '#000';
       bar.style.color = a.textColor || '#fff';
       bar.innerHTML = `<div class="announcement-content">
-        <span class="announcement-text">${a.text}${a.link ? ' <a href="'+a.link+'" style="color:inherit;text-decoration:underline">'+ (a.linkText||'Learn More') +'</a>' : ''}</span>
+        <span class="announcement-text">${escapeHtml(a.text)}${a.link ? ' <a href="'+escapeHtml(a.link)+'" style="color:inherit;text-decoration:underline">'+ escapeHtml(a.linkText||'Learn More') +'</a>' : ''}</span>
         <button class="announcement-close" aria-label="Close announcement">&times;</button>
       </div>`;
       bar.querySelector('.announcement-close')?.addEventListener('click', () => {
@@ -347,7 +350,7 @@ async function loadCategoryDropdown() {
   if (!data?.data) return;
 
   dropdown.innerHTML = data.data.map((cat) =>
-    `<li><a href="/shop?category=${cat._id}">${cat.name}</a></li>`
+    `<li><a href="/shop?category=${cat._id}">${escapeHtml(cat.name)}</a></li>`
   ).join('');
 }
 

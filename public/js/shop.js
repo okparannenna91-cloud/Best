@@ -97,13 +97,13 @@ function renderProducts(products) {
     return `
       <div class="product-card fade-in" data-product-id="${p._id}" onclick="window.location='/product/${p.slug}'">
         <div class="product-card-image">
-          <img src="${p.images?.[0] || ''}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'">
-          ${p.badge ? `<span class="product-badge">${p.badge}</span>` : ''}
+          <img src="${getProductImage(p)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.style.display='none'">
+          ${p.badge ? `<span class="product-badge">${escapeHtml(p.badge)}</span>` : ''}
           ${p.comparePrice ? `<span class="product-badge" style="left:auto;right:12px;background:var(--color-white);color:var(--color-black);">${Math.round((1 - p.price / p.comparePrice) * 100)}% OFF</span>` : ''}
         </div>
         <div class="product-card-info">
-          <span class="product-card-category">${p.category?.name || ''}</span>
-          <span class="product-card-name">${p.name}</span>
+          <span class="product-card-category">${escapeHtml(p.category?.name || '')}</span>
+          <span class="product-card-name">${escapeHtml(p.name)}</span>
           <div class="product-card-rating">
             <span class="stars">${starHTML}</span>
             <span>(${p.ratingsCount || 0})</span>
@@ -170,7 +170,7 @@ function renderCategoryFilters(categories) {
   html += categories.map((cat) => `
     <label class="filter-option">
       <input type="radio" name="category" value="${cat._id}" ${currentState.category === cat._id ? 'checked' : ''}>
-      ${cat.name}
+      ${escapeHtml(cat.name)}
     </label>
   `).join('');
 
@@ -194,14 +194,14 @@ function renderActiveFilters() {
   if (currentState.category && categoriesCache) {
     const cat = categoriesCache.find((c) => c._id === currentState.category);
     if (cat) {
-      tags += `<span class="active-filter-tag">${cat.name} <button onclick="removeFilter('category')">&times;</button></span>`;
+      tags += `<span class="active-filter-tag">${escapeHtml(cat.name)} <button onclick="removeFilter('category')">&times;</button></span>`;
     }
   }
   if (currentState.search) {
-    tags += `<span class="active-filter-tag">"${currentState.search}" <button onclick="removeFilter('search')">&times;</button></span>`;
+    tags += `<span class="active-filter-tag">"${escapeHtml(currentState.search)}" <button onclick="removeFilter('search')">&times;</button></span>`;
   }
   if (currentState.minPrice || currentState.maxPrice) {
-    tags += `<span class="active-filter-tag">Price: ${currentState.minPrice || '0'} — ${currentState.maxPrice || '∞'} <button onclick="removeFilter('price')">&times;</button></span>`;
+    tags += `<span class="active-filter-tag">Price: ${escapeHtml(currentState.minPrice || '0')} — ${escapeHtml(currentState.maxPrice || '∞')} <button onclick="removeFilter('price')">&times;</button></span>`;
   }
   if (currentState.inStock) {
     tags += `<span class="active-filter-tag">In stock <button onclick="removeFilter('inStock')">&times;</button></span>`;

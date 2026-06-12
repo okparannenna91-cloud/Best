@@ -36,7 +36,8 @@
       const d = await res.json();
       const el = document.getElementById('categoriesList');
       if (!d.success || !d.data?.length) { el.innerHTML = '<p style="text-align:center;color:var(--color-gray-400);padding:40px 0">No categories found.</p>'; return; }
-      el.innerHTML = d.data.map(c => `<div class="category-card-lg" onclick="window.location='/shop?category=${c._id}'"><img src="${c.image || ''}" onerror="this.style.display='none'" alt="${c.name}"><div><h3>${c.name}</h3><p>${c.description || 'Explore our collection of '+c.name.toLowerCase()}</p><span class="category-count">Shop ${c.name} →</span></div></div>`).join('');
+      function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+      el.innerHTML = d.data.map(c => `<div class="category-card-lg" onclick="window.location='/shop?category=${c._id}'"><img src="${c.image || ''}" onerror="this.style.display='none'" alt="${esc(c.name)}"><div><h3>${esc(c.name)}</h3><p>${esc(c.description || 'Explore our collection of '+c.name.toLowerCase())}</p><span class="category-count">Shop ${esc(c.name)} →</span></div></div>`).join('');
     }
     document.addEventListener('DOMContentLoaded', loadCategories);
   </script>

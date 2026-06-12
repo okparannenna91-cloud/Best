@@ -28,7 +28,7 @@ function addToRecentlyViewed(product) {
     name: product.name,
     slug: product.slug,
     price: product.price,
-    image: product.images?.[0] || '',
+    image: getProductImage(product),
     category: product.category?.name || '',
   });
   if (viewed.length > 6) viewed = viewed.slice(0, 6);
@@ -48,11 +48,11 @@ function renderRecentlyViewed() {
   container.innerHTML = viewed.map((p) => `
     <div class="product-card fade-in" data-product-id="${p._id}" onclick="window.location='/product/${p.slug}'">
       <div class="product-card-image">
-        <img src="${p.image || ''}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'">
+        <img src="${p.image || ''}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.style.display='none'">
       </div>
       <div class="product-card-info">
-        <span class="product-card-category">${p.category || ''}</span>
-        <span class="product-card-name">${p.name}</span>
+        <span class="product-card-category">${escapeHtml(p.category || '')}</span>
+        <span class="product-card-name">${escapeHtml(p.name)}</span>
         <span class="product-card-price" data-original-price="${p.price}">${formatPrice(p.price)}</span>
       </div>
     </div>
@@ -86,7 +86,7 @@ function renderProduct(product) {
   document.getElementById('ogTitle').textContent = `${product.name} — SOLLENE`;
   document.getElementById('ogDesc').textContent = product.description || '';
   document.getElementById('ogUrl').content = window.location.href;
-  document.getElementById('ogImage').content = product.images?.[0] || '';
+  document.getElementById('ogImage').content = getProductImage(product);
   document.getElementById('canonical').href = window.location.href;
 
   document.getElementById('breadcrumbCategory').textContent = product.category?.name || '';
@@ -123,7 +123,7 @@ function renderProduct(product) {
     stockEl.innerHTML = `<span class="stock-dot out-of-stock"></span><span class="stock-text out-of-stock">Out of Stock</span>`;
   }
 
-  document.getElementById('productDescription').innerHTML = product.description || '';
+  document.getElementById('productDescription').innerHTML = escapeHtml(product.description || '');
   renderVariants(product.variants || []);
 
   document.querySelector('.product-info-skeleton')?.classList.add('hidden');
@@ -143,30 +143,31 @@ function renderProduct(product) {
 function renderGallery(images) {
   const mainImg = document.getElementById('mainImage');
   const thumbsContainer = document.getElementById('galleryThumbs');
+  const urls = images.map(img => getImgUrl(img));
 
-  if (images.length === 0) {
-    images = ['/images/placeholder.svg'];
+  if (urls.length === 0) {
+    urls.push('/images/placeholder.svg');
   }
 
-  mainImg.src = images[0];
+  mainImg.src = urls[0];
   mainImg.alt = 'Product image';
 
-  thumbsContainer.innerHTML = images.map((img, i) => `
+  thumbsContainer.innerHTML = urls.map((url, i) => `
     <div class="gallery-thumb ${i === 0 ? 'active' : ''}" data-index="${i}">
-      <img src="${img}" alt="" loading="lazy" onerror="this.style.display='none'">
+      <img src="${url}" alt="" loading="lazy" onerror="this.style.display='none'">
     </div>
   `).join('');
 
   thumbsContainer.querySelectorAll('.gallery-thumb').forEach((thumb) => {
     thumb.addEventListener('click', () => {
       const idx = parseInt(thumb.dataset.index);
-      mainImg.src = images[idx];
+      mainImg.src = urls[idx];
       thumbsContainer.querySelectorAll('.gallery-thumb').forEach((t) => t.classList.remove('active'));
       thumb.classList.add('active');
     });
   });
 
-  initZoom(images);
+  initZoom(urls);
 }
 
 function initZoom(images) {
@@ -231,9 +232,9 @@ function renderVariants(variants) {
   let html = '';
   for (const [key, values] of Object.entries(grouped)) {
     html += `<div class="variant-group">
-      <label>${key}</label>
+      <label>${escapeHtml(key)}</label>
       <div class="variant-options">
-        ${values.map((val) => `<button class="variant-btn" data-attr="${key}" data-val="${val}">${val}</button>`).join('')}
+        ${values.map((val) => `<button class="variant-btn" data-attr="${escapeHtml(key)}" data-val="${escapeHtml(val)}">${escapeHtml(val)}</button>`).join('')}
       </div>
     </div>`;
   }
@@ -249,7 +250,7 @@ function renderVariants(variants) {
 }
 
 function renderDescription(desc) {
-  document.getElementById('tabDescriptionContent').innerHTML = desc || 'No description available.';
+  document.getElementById('tabDescriptionContent').innerHTML = escapeHtml(desc || 'No description available.');
 }
 
 function renderSpecs(product) {
@@ -267,8 +268,8 @@ function renderSpecs(product) {
 
   container.innerHTML = specs.map((s) => `
     <div class="spec-row">
-      <span class="spec-label">${s.label}</span>
-      <span class="spec-value">${s.value}</span>
+      <span class="spec-label">${escapeHtml(s.label)}</span>
+      <span class="spec-value">${escapeHtml(s.value)}</span>
     </div>
   `).join('');
 }
@@ -286,11 +287,11 @@ async function loadRelatedProducts(productId) {
     return `
       <div class="product-card fade-in" data-product-id="${p._id}" onclick="window.location='/product/${p.slug}'">
         <div class="product-card-image">
-          <img src="${p.images?.[0] || ''}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'">
+          <img src="${getProductImage(p)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.style.display='none'">
         </div>
         <div class="product-card-info">
-          <span class="product-card-category">${p.category?.name || ''}</span>
-          <span class="product-card-name">${p.name}</span>
+          <span class="product-card-category">${escapeHtml(p.category?.name || '')}</span>
+          <span class="product-card-name">${escapeHtml(p.name)}</span>
           <span class="product-card-price" data-original-price="${p.price}">${formatPrice(p.price)}</span>
         </div>
       </div>
