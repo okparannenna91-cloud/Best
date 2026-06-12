@@ -160,6 +160,10 @@ const API = '/api/admin';
 let currentSection = 'dashboard';
 let categories = [];
 
+function imgUrl(img) {
+  return img ? (img.url || img) : '';
+}
+
 function showView(view) {
   document.getElementById('adminAuth').style.display = view === 'auth' ? 'flex' : 'none';
   document.getElementById('adminApp').style.display = view === 'app' ? 'block' : 'none';
@@ -250,7 +254,7 @@ async function renderDashboard(el) {
   if (r.success && r.data?.length) {
     let t = '<table class="admin-table"><tr><th></th><th>Name</th><th>Price</th><th>Stock</th></tr>';
     r.data.forEach(p => {
-      t += `<tr><td>${p.images?.[0] ? '<div class="image-preview"><img src="' + p.images[0] + '" onerror="this.style.display=\'none\'"></div>' : ''}</td>
+      t += `<tr><td>${p.images?.[0] ? '<div class="image-preview"><img src="' + imgUrl(p.images[0]) + '" onerror="this.style.display=\'none\'"></div>' : ''}</td>
         <td style="font-weight:500">${p.name}</td>
         <td>₦${Number(p.price).toLocaleString()}</td>
         <td style="color:${p.stock <= 5 ? '#dc2626' : 'inherit'}">${p.stock ?? '—'}</td></tr>`;
@@ -272,7 +276,7 @@ async function renderProducts(el) {
     let t = '<div style="overflow-x:auto"><table class="admin-table">';
     t += '<tr><th></th><th>Name</th><th>Price</th><th>Stock</th><th>Category</th><th>Featured</th><th></th></tr>';
     d.data.forEach(p => {
-      const img = p.images?.[0] ? `<div class="image-preview"><img src="${p.images[0]}" onerror="this.style.display='none'"></div>` : '';
+      const img = p.images?.[0] ? `<div class="image-preview"><img src="${imgUrl(p.images[0])}" onerror="this.style.display='none'"></div>` : '';
       t += `<tr>
         <td>${img}</td>
         <td style="font-weight:500">${p.name}</td>
@@ -294,9 +298,50 @@ async function renderProducts(el) {
 }
 
 let pVariants = [];
+let pImages = [];
+
+function renderImageList() {
+  const el = document.getElementById('pImageList');
+  if (!el) return;
+  if (!pImages.length) { el.innerHTML = '<p style="color:var(--color-gray-400);font-size:0.8rem">No images uploaded.</p>'; return; }
+  el.innerHTML = pImages.map((img, i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--color-gray-50)">
+      <div class="image-preview"><img src="${img.url}" onerror="this.style.display='none'"></div>
+      <span style="flex:1;font-size:0.75rem;color:var(--color-gray-500);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${img.publicId || img.url}</span>
+      <button type="button" class="btn btn-outline btn-xs" style="color:#dc2626" onclick="removeProductImage(${i})">×</button>
+    </div>
+  `).join('');
+}
+
+async function uploadProductImage(file) {
+  const formData = new FormData();
+  formData.append('image', file);
+  try {
+    const res = await fetch(API + '/upload', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (data.success) {
+      pImages.push(data.data);
+      renderImageList();
+    } else {
+      toast('Upload failed');
+    }
+  } catch {
+    toast('Upload error');
+  }
+}
+
+function removeProductImage(index) {
+  const img = pImages[index];
+  if (img && img.publicId) {
+    apiFetch(API + '/remove-image', { method: 'POST', body: JSON.stringify({ publicId: img.publicId }) });
+  }
+  pImages.splice(index, 1);
+  renderImageList();
+}
 
 function productForm(id) {
   pVariants = [];
+  pImages = [];
   const isEdit = !!id;
   const catOpts = categories.map(c => '<option value="' + c._id + '">' + c.name + '</option>').join('');
   openModal(`<h2>${isEdit ? 'Edit' : 'Add'} Product</h2>
@@ -315,7 +360,13 @@ function productForm(id) {
         <div class="form-group"><label>Category</label><select class="form-input" id="pCategory">${catOpts}</select></div>
         <div class="form-group"><label>SKU</label><input class="form-input" id="pSku"></div>
       </div>
-      <div class="form-group"><label>Image URLs (comma separated)</label><input class="form-input" id="pImages" placeholder="https://..."></div>
+      <div style="border:1px solid var(--color-gray-100);padding:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong style="font-size:0.85rem">Images</strong>
+          <label class="btn btn-outline btn-xs" style="cursor:pointer">+ Upload<input type="file" id="pImageInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="display:none" onchange="handleImageUpload(event)"></label>
+        </div>
+        <div id="pImageList" style="font-size:0.85rem"><p style="color:var(--color-gray-400);font-size:0.8rem">No images uploaded.</p></div>
+      </div>
       <div style="display:flex;gap:16px;flex-wrap:wrap">
         <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem"><input type="checkbox" id="pFeatured"> Featured</label>
         <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem"><input type="checkbox" id="pBestSeller"> Best Seller</label>
@@ -334,6 +385,7 @@ function productForm(id) {
       </div>
     </form>`);
   renderVariantList();
+  renderImageList();
 
   if (isEdit) {
     apiFetch(API + '/products/' + id).then(r => {
@@ -346,11 +398,11 @@ function productForm(id) {
       document.getElementById('pCompare').value = p.comparePrice || '';
       document.getElementById('pStock').value = p.stock ?? 0;
       document.getElementById('pSku').value = p.sku || '';
-      document.getElementById('pImages').value = (p.images || []).join(', ');
       document.getElementById('pFeatured').checked = !!p.isFeatured;
       document.getElementById('pBestSeller').checked = !!p.isBestSeller;
       document.getElementById('pNewArrival').checked = !!p.isNewArrival;
       if (p.category) document.getElementById('pCategory').value = p.category._id || p.category;
+      if (p.images) { pImages = p.images.map(img => ({ url: img.url || img, publicId: img.publicId || '' })); renderImageList(); }
       if (p.variants) { pVariants = p.variants; renderVariantList(); }
     });
   }
@@ -366,7 +418,7 @@ function productForm(id) {
       stock: Number(document.getElementById('pStock').value),
       sku: document.getElementById('pSku').value,
       category: document.getElementById('pCategory').value,
-      images: document.getElementById('pImages').value.split(',').map(s => s.trim()).filter(Boolean),
+      images: pImages,
       isFeatured: document.getElementById('pFeatured').checked,
       isBestSeller: document.getElementById('pBestSeller').checked,
       isNewArrival: document.getElementById('pNewArrival').checked,
@@ -378,6 +430,13 @@ function productForm(id) {
     if (r.success) { closeModal(); toast(isEdit ? 'Product updated' : 'Product created'); loadSection('products'); }
     else { toast(r.message || 'Error saving product'); }
   });
+}
+
+function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  uploadProductImage(file);
+  event.target.value = '';
 }
 
 function renderVariantList() {

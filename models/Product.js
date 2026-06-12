@@ -13,7 +13,10 @@ const productSchema = new mongoose.Schema({
   slug: { type: String, required: true, unique: true, lowercase: true },
   description: { type: String, trim: true },
   category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
-  images: [{ type: String }],
+  images: [{
+    url: { type: String, required: true },
+    publicId: { type: String, default: '' },
+  }],
   price: { type: Number, required: true },
   comparePrice: { type: Number },
   costPrice: { type: Number },
@@ -34,6 +37,13 @@ const productSchema = new mongoose.Schema({
     metaDescription: { type: String },
   },
 }, { timestamps: true });
+
+productSchema.virtual('imageUrls').get(function () {
+  return (this.images || []).map(img => (typeof img === 'string' ? img : img.url));
+});
+
+productSchema.set('toJSON', { virtuals: true });
+productSchema.set('toObject', { virtuals: true });
 
 productSchema.index({ name: 'text', description: 'text', tags: 'text' });
 productSchema.index({ category: 1, isActive: 1, price: 1 });

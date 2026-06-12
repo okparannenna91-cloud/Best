@@ -3,10 +3,12 @@ const { authenticate, requireAdmin } = require('../middleware/auth');
 const { login, logout, checkSession, getDashboardStats } = require('../controllers/adminController');
 const {
   getAllProducts, getProductById, createProduct, updateProduct, deleteProduct,
+  uploadImage, removeImage,
 } = require('../controllers/adminProductController');
 const {
   getAllCategories, getCategoryById, createCategory, updateCategory, deleteCategory,
 } = require('../controllers/adminCategoryController');
+const upload = require('../middleware/upload');
 
 const router = Router();
 
@@ -17,6 +19,9 @@ router.use(authenticate, requireAdmin);
 
 router.get('/check', checkSession);
 router.get('/dashboard', getDashboardStats);
+
+router.post('/upload', upload.single('image'), uploadImage);
+router.post('/remove-image', removeImage);
 
 router.get('/products', getAllProducts);
 router.get('/products/:id', getProductById);
