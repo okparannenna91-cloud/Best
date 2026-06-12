@@ -19,6 +19,7 @@ const app = express();
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
   contentSecurityPolicy: {
+    useDefaults: false,
     directives: {
       defaultSrc: ["'self'"],
       baseUri: ["'self'"],
@@ -28,7 +29,7 @@ app.use(helmet({
       imgSrc: ["'self'", "data:"],
       objectSrc: ["'none'"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
-
+      scriptSrcAttr: ["'unsafe-inline'"],
       workerSrc: ["'self'", "blob:"],
       styleSrc: ["'self'", "https:", "'unsafe-inline'"],
       upgradeInsecureRequests: [],
