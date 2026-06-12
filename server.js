@@ -32,6 +32,7 @@ app.use(helmet({
       objectSrc: ["'none'"],
       scriptSrc: ["'self'", "https://cdn.jsdelivr.net"],
       scriptSrcAttr: ["'none'"],
+      workerSrc: ["'self'", "blob:"],
       styleSrc: ["'self'", "https:", "'unsafe-inline'"],
       upgradeInsecureRequests: [],
       connectSrc: ["'self'", "https://clerk.sollene.site", "https://*.clerk.com"],
