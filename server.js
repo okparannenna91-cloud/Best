@@ -113,24 +113,20 @@ for (const [route, file] of Object.entries(staticPages)) {
   });
 }
 
-app.get('/admin', (req, res) => {
+const ADMIN_USER_ID = process.env.CLERK_ADMIN_USER_ID || '';
+function serveAdminHtml(req, res) {
   const filePath = path.join(__dirname, 'public', 'admin.html');
   const html = fs.readFileSync(filePath, 'utf-8');
-  const injected = html.replace(
-    "{{CLERK_PUBLISHABLE_KEY}}",
-    process.env.CLERK_PUBLISHABLE_KEY || ''
-  );
+  const injected = html
+    .replace("{{CLERK_PUBLISHABLE_KEY}}", process.env.CLERK_PUBLISHABLE_KEY || '')
+    .replace("{{ADMIN_USER_ID}}", ADMIN_USER_ID);
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
   res.type('html').send(injected);
-});
-app.get('/admin/*path', (req, res) => {
-  const filePath = path.join(__dirname, 'public', 'admin.html');
-  const html = fs.readFileSync(filePath, 'utf-8');
-  const injected = html.replace(
-    "{{CLERK_PUBLISHABLE_KEY}}",
-    process.env.CLERK_PUBLISHABLE_KEY || ''
-  );
-  res.type('html').send(injected);
-});
+}
+app.get('/admin', serveAdminHtml);
+app.get('/admin/*path', serveAdminHtml);
 
 app.get('/robots.txt', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'robots.txt'));

@@ -27,13 +27,13 @@ const authenticate = async (req, res, next) => {
     const sessionToken = req.cookies?.__session || req.headers?.authorization?.replace('Bearer ', '');
 
     if (!sessionToken) {
-      return next(ApiError.unauthorized('No authentication token provided'));
+      return next(ApiError.notFound());
     }
 
     const session = await verifyClerkSession(sessionToken);
 
     if (!session) {
-      return next(ApiError.unauthorized('Invalid or expired session'));
+      return next(ApiError.notFound());
     }
 
     const clerkUser = await clerkClient.users.getUser(session.userId);
@@ -42,7 +42,7 @@ const authenticate = async (req, res, next) => {
     req.clerkUserId = session.userId;
     next();
   } catch (error) {
-    return next(ApiError.unauthorized('Authentication failed'));
+    return next(ApiError.notFound());
   }
 };
 
@@ -66,7 +66,7 @@ const optionalAuth = async (req, res, next) => {
 
 const requireAdmin = (req, res, next) => {
   if (!req.user || req.clerkUserId !== ADMIN_USER_ID) {
-    return next(ApiError.forbidden('Admin access required'));
+    return next(ApiError.notFound());
   }
   next();
 };

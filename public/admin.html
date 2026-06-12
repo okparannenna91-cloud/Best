@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin — SOLLENE</title>
+<title>SOLLENE</title>
 <link rel="canonical" href="https://sollene.site/admin">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
@@ -59,15 +59,20 @@ textarea.form-input{resize:vertical;min-height:80px}
 .toast{position:fixed;bottom:24px;right:24px;padding:12px 24px;background:var(--color-black);color:var(--color-white);font-size:0.85rem;z-index:2000;opacity:0;transition:var(--transition-base);pointer-events:none}
 .toast.show{opacity:1}
 .empty-state{padding:40px 0;text-align:center;color:var(--color-gray-400);font-size:0.9rem}
-#adminAuth{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - var(--header-height))}
-#adminAuth .auth-card{text-align:center;padding:48px;max-width:400px}
-#adminAuth .auth-card h1{font-family:var(--font-display);font-size:2rem;margin-bottom:8px}
-#adminAuth .auth-card p{color:var(--color-gray-400);margin-bottom:24px;font-size:0.9rem}
 .mobile-nav-select{display:none;width:100%;padding:12px 16px;border:1px solid var(--color-gray-200);font-size:0.9rem;margin-bottom:20px;background:var(--color-white)}
 @media(max-width:768px){.mobile-nav-select{display:block}}
 .variant-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--color-gray-50);font-size:0.8rem}
 .image-preview{width:36px;height:36px;background:var(--color-gray-50);overflow:hidden;border-radius:4px;flex-shrink:0}
 .image-preview img{width:100%;height:100%;object-fit:cover}
+#adminAuth,#adminApp,#notFoundPage{display:none}
+.auth-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff}
+.auth-card{text-align:center;padding:48px 32px;max-width:400px;width:100%}
+.auth-logo{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:700;color:#000;margin-bottom:12px;letter-spacing:-0.5px}
+.auth-subtitle{color:#666;margin-bottom:32px;font-size:0.9rem;letter-spacing:0.3px}
+.not-found-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff}
+.not-found-inner{text-align:center}
+.not-found-inner h1{font-family:'Playfair Display',serif;font-size:6rem;font-weight:700;color:#000;margin:0;line-height:1}
+.not-found-inner p{font-size:1rem;color:#666;margin-top:16px;letter-spacing:0.5px}
 </style>
 </head>
 <body class="admin-page">
@@ -91,7 +96,15 @@ textarea.form-input{resize:vertical;min-height:80px}
   </div>
 </header>
 
-<div id="adminApp" style="display:none">
+<div id="adminAuth" class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">SOLLENE</div>
+    <p class="auth-subtitle">Sign in to manage your store</p>
+    <div id="clerkMount"></div>
+  </div>
+</div>
+
+<div id="adminApp">
   <div class="container">
     <div class="admin-layout">
       <aside class="admin-sidebar">
@@ -115,11 +128,10 @@ textarea.form-input{resize:vertical;min-height:80px}
   </div>
 </div>
 
-<div id="adminAuth">
-  <div class="auth-card">
-    <h1>SOLLENE</h1>
-    <p>Sign in to manage your store</p>
-    <div id="clerkMount"></div>
+<div id="notFoundPage" class="not-found-page">
+  <div class="not-found-inner">
+    <h1>404</h1>
+    <p>Page Not Found</p>
   </div>
 </div>
 
@@ -134,12 +146,21 @@ textarea.form-input{resize:vertical;min-height:80px}
 
 <script>
 const PUBLISHABLE_KEY = '{{CLERK_PUBLISHABLE_KEY}}';
+const ADMIN_USER_ID = '{{ADMIN_USER_ID}}';
 
 let clerk = null;
 let clerkUser = null;
 const API = '/api/admin';
 let currentSection = 'dashboard';
 let categories = [];
+
+function showView(view) {
+  document.getElementById('adminAuth').style.display = view === 'auth' ? 'flex' : 'none';
+  document.getElementById('adminApp').style.display = view === 'app' ? 'block' : 'none';
+  document.getElementById('notFoundPage').style.display = view === '404' ? 'flex' : 'none';
+  const signOutBtn = document.getElementById('signOutBtn');
+  if (signOutBtn) signOutBtn.style.display = view === 'app' ? 'flex' : 'none';
+}
 
 async function apiFetch(url, opts = {}) {
   const res = await fetch(url, {
@@ -165,7 +186,7 @@ function openModal(html) {
 
 function switchSection(section) {
   currentSection = section;
-  document.querySelectorAll('.admin-nav-item').forEach(e => e.classList.toggle('active', e.dataset.section === s));
+  document.querySelectorAll('.admin-nav-item').forEach(e => e.classList.toggle('active', e.dataset.section === section));
   document.getElementById('mobileNav').value = section;
   loadSection(section);
 }
@@ -186,23 +207,22 @@ async function fetchCategories() {
 
 async function renderDashboard(el) {
   const d = await apiFetch(API + '/dashboard');
+  if (!d.success) { el.innerHTML = '<p class="empty-state">Could not load dashboard.</p>'; return; }
   let html = `<div class="admin-header">
     <h1>Dashboard</h1>
     <span style="font-size:0.85rem;color:var(--color-gray-400)">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
   </div>`;
-  if (d.success) {
-    const s = d.data;
-    html += `<div class="admin-stats">
-      <div class="admin-stat-card">
-        <div class="admin-stat-label">Total Products</div>
-        <div class="admin-stat-value">${s.totalProducts || 0}</div>
-      </div>
-      <div class="admin-stat-card">
-        <div class="admin-stat-label">Categories</div>
-        <div class="admin-stat-value">${s.totalCategories || 0}</div>
-      </div>
-    </div>`;
-  }
+  const s = d.data;
+  html += `<div class="admin-stats">
+    <div class="admin-stat-card">
+      <div class="admin-stat-label">Total Products</div>
+      <div class="admin-stat-value">${s.totalProducts || 0}</div>
+    </div>
+    <div class="admin-stat-card">
+      <div class="admin-stat-label">Categories</div>
+      <div class="admin-stat-value">${s.totalCategories || 0}</div>
+    </div>
+  </div>`;
   html += `<div class="admin-card">
     <div class="admin-card-header">
       <div class="admin-card-title">Quick Actions</div>
@@ -495,43 +515,101 @@ async function initClerk() {
     const c = new Clerk(PUBLISHABLE_KEY);
     await c.load();
     clerk = c;
+
     const mountEl = document.getElementById('clerkMount');
-    const authEl = document.getElementById('adminAuth');
-    const appEl = document.getElementById('adminApp');
     const signOutBtn = document.getElementById('signOutBtn');
 
     if (c.user) {
-      clerkUser = c.user;
-      authEl.style.display = 'none';
-      appEl.style.display = 'block';
-      signOutBtn.style.display = 'flex';
-      loadSection('dashboard');
+      if (c.user.id === ADMIN_USER_ID) {
+        clerkUser = c.user;
+        showView('app');
+        loadSection(currentSection);
+      } else {
+        showView('404');
+        if (signOutBtn) signOutBtn.style.display = 'none';
+      }
     } else {
-      authEl.style.display = 'flex';
-      appEl.style.display = 'none';
-      signOutBtn.style.display = 'none';
-      c.mountSignIn(mountEl, { appearance: { variables: { colorPrimary: '#000000' } } });
+      showView('auth');
+      if (mountEl) {
+        c.mountSignIn(mountEl, {
+          appearance: {
+            variables: {
+              colorPrimary: '#000000',
+              colorTextOnPrimaryBackground: '#ffffff',
+              colorBackground: '#ffffff',
+              colorInputBackground: '#ffffff',
+              colorInputText: '#000000',
+              fontFamily: 'Inter, sans-serif',
+              borderRadius: '0px',
+            },
+            elements: {
+              card: { boxShadow: 'none', border: '1px solid #e5e5e5', borderRadius: '0' },
+              headerTitle: { display: 'none' },
+              headerSubtitle: { display: 'none' },
+              socialButtonsBlockButton: { borderRadius: '0', border: '1px solid #000', fontWeight: '500' },
+              formButtonPrimary: { backgroundColor: '#000', borderRadius: '0', fontSize: '0.85rem', fontWeight: '600' },
+              footerAction: { display: 'none' },
+              formFieldLabel: { fontWeight: '500', fontSize: '0.8rem' },
+              formFieldInput: { borderRadius: '0', border: '1px solid #e5e5e5', fontSize: '0.9rem' },
+              dividerLine: { background: '#e5e5e5' },
+              dividerText: { color: '#999', fontSize: '0.75rem' },
+            },
+          },
+        });
+      }
     }
 
     c.addListener(({ user }) => {
-      if (user && !clerkUser) {
-        clerkUser = user;
-        authEl.style.display = 'none';
-        appEl.style.display = 'block';
-        signOutBtn.style.display = 'flex';
-        loadSection('dashboard');
-      } else if (!user && clerkUser) {
+      if (user) {
+        if (user.id === ADMIN_USER_ID) {
+          clerkUser = user;
+          showView('app');
+          loadSection(currentSection);
+        } else {
+          showView('404');
+        }
+      } else {
         clerkUser = null;
-        authEl.style.display = 'flex';
-        appEl.style.display = 'none';
-        signOutBtn.style.display = 'none';
-        c.mountSignIn(mountEl, { appearance: { variables: { colorPrimary: '#000000' } } });
+        showView('auth');
+        if (mountEl) {
+          c.mountSignIn(mountEl, {
+            appearance: {
+              variables: {
+                colorPrimary: '#000000',
+                colorTextOnPrimaryBackground: '#ffffff',
+                colorBackground: '#ffffff',
+                colorInputBackground: '#ffffff',
+                colorInputText: '#000000',
+                fontFamily: 'Inter, sans-serif',
+                borderRadius: '0px',
+              },
+              elements: {
+                card: { boxShadow: 'none', border: '1px solid #e5e5e5', borderRadius: '0' },
+                headerTitle: { display: 'none' },
+                headerSubtitle: { display: 'none' },
+                socialButtonsBlockButton: { borderRadius: '0', border: '1px solid #000', fontWeight: '500' },
+                formButtonPrimary: { backgroundColor: '#000', borderRadius: '0', fontSize: '0.85rem', fontWeight: '600' },
+                footerAction: { display: 'none' },
+                formFieldLabel: { fontWeight: '500', fontSize: '0.8rem' },
+                formFieldInput: { borderRadius: '0', border: '1px solid #e5e5e5', fontSize: '0.9rem' },
+                dividerLine: { background: '#e5e5e5' },
+                dividerText: { color: '#999', fontSize: '0.75rem' },
+              },
+            },
+          });
+        }
       }
     });
 
-    signOutBtn.addEventListener('click', () => { c.signOut(); });
+    if (signOutBtn) {
+      signOutBtn.addEventListener('click', () => { c.signOut(); });
+    }
   } catch (err) {
-    document.getElementById('adminMain').innerHTML = '<p style="color:#dc2626">Failed to load authentication. Check your Clerk configuration.</p>';
+    document.getElementById('adminAuth').innerHTML = `
+      <div class="auth-card">
+        <div class="auth-logo">SOLLENE</div>
+        <p style="color:#dc2626;font-size:0.85rem">Unable to load authentication.</p>
+      </div>`;
   }
 }
 
@@ -550,14 +628,14 @@ document.addEventListener('DOMContentLoaded', () => {
     switchSection(this.value);
   });
 
-  if (PUBLISHABLE_KEY && PUBLISHABLE_KEY !== '{{CLERK_PUBLISHABLE_KEY}}') {
+  if (PUBLISHABLE_KEY && PUBLISHABLE_KEY !== '{{CLERK_PUBLISHABLE_KEY}}' && ADMIN_USER_ID !== '{{ADMIN_USER_ID}}') {
     initClerk();
   } else {
     document.getElementById('adminAuth').innerHTML = `
       <div class="auth-card">
-        <h1>SOLLENE</h1>
-        <p style="color:#dc2626">Clerk publishable key not configured.</p>
-        <p style="font-size:0.8rem">Set CLERK_PUBLISHABLE_KEY in your environment variables.</p>
+        <div class="auth-logo">SOLLENE</div>
+        <p style="color:#dc2626;font-size:0.85rem">Configuration incomplete.</p>
+        <p style="font-size:0.8rem;color:#666">Set CLERK_PUBLISHABLE_KEY and CLERK_ADMIN_USER_ID in environment variables.</p>
       </div>`;
   }
 });
