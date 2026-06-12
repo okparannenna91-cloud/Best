@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const ApiResponse = require('../utils/ApiResponse');
@@ -7,7 +8,17 @@ const { generateSession, COOKIE_NAME } = require('../middleware/auth');
 exports.login = (req, res, next) => {
   try {
     const { password } = req.body;
-    if (!password || password !== process.env.ADMIN_PASSWORD) {
+    const adminPassword = process.env.ADMIN_PASSWORD || '';
+    if (!password || !adminPassword) {
+      return next(ApiError.notFound());
+    }
+    const pwBuf = Buffer.from(password);
+    const adminBuf = Buffer.from(adminPassword);
+    const valid = crypto.timingSafeEqual(
+      Buffer.concat([pwBuf, Buffer.alloc(adminBuf.length - pwBuf.length)]),
+      Buffer.concat([adminBuf, Buffer.alloc(pwBuf.length - adminBuf.length)])
+    );
+    if (!valid) {
       return next(ApiError.notFound());
     }
 
@@ -38,14 +49,16 @@ exports.checkSession = (req, res) => {
 
 exports.getDashboardStats = async (req, res, next) => {
   try {
-    const [totalProducts, totalCategories] = await Promise.all([
+    const [totalProducts, totalCategories, allProducts] = await Promise.all([
       Product.countDocuments({ isActive: true }),
       Category.countDocuments({ isActive: true }),
+      Product.countDocuments(),
     ]);
 
     ApiResponse.success(res, {
       totalProducts,
       totalCategories,
+      totalAllProducts: allProducts,
     });
   } catch (error) {
     next(error);

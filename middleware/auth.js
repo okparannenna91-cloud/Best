@@ -2,7 +2,13 @@ const jwt = require('jsonwebtoken');
 const ApiError = require('../utils/ApiError');
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
-const JWT_SECRET = process.env.JWT_SECRET || (ADMIN_PASSWORD ? require('crypto').createHash('sha256').update(ADMIN_PASSWORD).digest('hex') : 'fallback_dev_secret');
+if (!ADMIN_PASSWORD) {
+  console.error('FATAL: ADMIN_PASSWORD environment variable is not set. Admin login will be disabled.');
+}
+if (!process.env.JWT_SECRET && !ADMIN_PASSWORD) {
+  console.error('FATAL: Neither JWT_SECRET nor ADMIN_PASSWORD is set. Server cannot secure admin sessions.');
+}
+const JWT_SECRET = process.env.JWT_SECRET || (ADMIN_PASSWORD ? require('crypto').createHash('sha256').update(ADMIN_PASSWORD).digest('hex') : '');
 const SESSION_DURATION = '24h';
 
 const COOKIE_NAME = 'admin_session';

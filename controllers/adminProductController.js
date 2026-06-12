@@ -8,11 +8,12 @@ const cloudinary = require('../config/cloudinary');
 const FOLDER = 'sollene/products';
 
 function normalizeImages(images) {
-  if (!images) return [];
+  if (!Array.isArray(images)) return [];
   return images.map(img => {
-    if (typeof img === 'string') return { url: img, publicId: '' };
-    return { url: img.url || '', publicId: img.publicId || '' };
-  });
+    if (typeof img === 'string') return img ? { url: img, publicId: '' } : null;
+    if (!img || !img.url) return null;
+    return { url: img.url, publicId: img.publicId || '' };
+  }).filter(Boolean);
 }
 
 function uploadToCloudinary(buffer) {
@@ -28,9 +29,34 @@ function uploadToCloudinary(buffer) {
   });
 }
 
+const MAGIC_BYTES = {
+  'image/jpeg': [[0xFF, 0xD8, 0xFF]],
+  'image/png': [[0x89, 0x50, 0x4E, 0x47]],
+  'image/webp': [[0x52, 0x49, 0x46, 0x46]],
+};
+
+function validateImageBuffer(buffer, mimeType) {
+  const sigs = MAGIC_BYTES[mimeType];
+  if (!sigs) return false;
+  return sigs.some(sig => {
+    if (buffer.length < sig.length) return false;
+    for (let i = 0; i < sig.length; i++) {
+      if (buffer[i] !== sig[i]) return false;
+    }
+    if (mimeType === 'image/webp') {
+      if (buffer.length < 12) return false;
+      if (buffer[8] !== 0x57 || buffer[9] !== 0x45 || buffer[10] !== 0x42 || buffer[11] !== 0x50) return false;
+    }
+    return true;
+  });
+}
+
 exports.uploadImage = async (req, res, next) => {
   try {
     if (!req.file) return next(ApiError.badRequest('No file provided'));
+    if (!validateImageBuffer(req.file.buffer, req.file.mimetype)) {
+      return next(ApiError.badRequest('Invalid or corrupted image file'));
+    }
 
     const result = await uploadToCloudinary(req.file.buffer);
     ApiResponse.success(res, result, 'Image uploaded');
@@ -55,16 +81,16 @@ exports.getAllProducts = async (req, res, next) => {
   try {
     const { page = 1, limit = 20, category, search, isActive } = req.query;
     const query = {};
-    if (category) query.category = category;
+    if (category && typeof category === 'string') query.category = category;
     if (isActive !== undefined) query.isActive = isActive === 'true';
-    if (search) query.name = { $regex: search, $options: 'i' };
+    if (search && typeof search === 'string') query.name = { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' };
 
     const total = await Product.countDocuments(query);
     const products = await Product.find(query)
       .populate('category', 'name')
       .sort({ createdAt: -1 })
-      .skip((Number(page) - 1) * Number(limit))
-      .limit(Number(limit));
+      .skip(Math.max(0, (Number(page) - 1)) * Math.min(Number(limit), 100))
+      .limit(Math.min(Number(limit), 100));
 
     const result = products.map(p => {
       const doc = p.toObject();
@@ -91,7 +117,7 @@ exports.getProductById = async (req, res, next) => {
 };
 
 const ALLOWED_FIELDS = [
-  'name', 'description', 'category', 'price', 'comparePrice', 'stock', 'sku',
+  'name', 'slug', 'description', 'category', 'price', 'comparePrice', 'stock', 'sku',
   'variants', 'isFeatured', 'isBestSeller', 'isNewArrival', 'tags', 'badge',
   'images', 'specifications', 'seo', 'isActive',
 ];

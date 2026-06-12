@@ -124,6 +124,10 @@ app.get('/sitemap.xml', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'sitemap.xml'));
 });
 
+app.use('/api', (req, res) => {
+  res.status(404).json({ success: false, message: `Route ${req.method} ${req.path} not found` });
+});
+
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;

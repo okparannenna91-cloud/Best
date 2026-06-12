@@ -160,6 +160,11 @@ const API = '/api/admin';
 let currentSection = 'dashboard';
 let categories = [];
 
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function imgUrl(img) {
   return img ? (img.url || img) : '';
 }
@@ -173,11 +178,13 @@ function showView(view) {
 }
 
 async function apiFetch(url, opts = {}) {
-  const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json' },
-    ...opts,
-  });
-  return await res.json();
+  opts.headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  const res = await fetch(url, opts);
+  try {
+    return await res.json();
+  } catch {
+    return { success: false, message: `Request failed (${res.status})` };
+  }
 }
 
 function toast(msg) {
@@ -210,9 +217,13 @@ async function loadSection(section) {
 }
 
 async function fetchCategories() {
-  const r = await fetch('/api/categories');
-  const d = await r.json();
-  categories = d.data || [];
+  try {
+    const r = await fetch('/api/categories');
+    const d = await r.json();
+    categories = d.data || [];
+  } catch {
+    categories = [];
+  }
 }
 
 async function renderDashboard(el) {
@@ -255,7 +266,7 @@ async function renderDashboard(el) {
     let t = '<table class="admin-table"><tr><th></th><th>Name</th><th>Price</th><th>Stock</th></tr>';
     r.data.forEach(p => {
       t += `<tr><td>${p.images?.[0] ? '<div class="image-preview"><img src="' + imgUrl(p.images[0]) + '" onerror="this.style.display=\'none\'"></div>' : ''}</td>
-        <td style="font-weight:500">${p.name}</td>
+        <td style="font-weight:500">${escapeHtml(p.name)}</td>
         <td>₦${Number(p.price).toLocaleString()}</td>
         <td style="color:${p.stock <= 5 ? '#dc2626' : 'inherit'}">${p.stock ?? '—'}</td></tr>`;
     });
@@ -279,14 +290,14 @@ async function renderProducts(el) {
       const img = p.images?.[0] ? `<div class="image-preview"><img src="${imgUrl(p.images[0])}" onerror="this.style.display='none'"></div>` : '';
       t += `<tr>
         <td>${img}</td>
-        <td style="font-weight:500">${p.name}</td>
+        <td style="font-weight:500">${escapeHtml(p.name)}</td>
         <td>₦${Number(p.price).toLocaleString()}</td>
         <td style="color:${p.stock <= 5 ? '#dc2626' : 'inherit'}">${p.stock ?? '—'}</td>
-        <td style="font-size:0.8rem">${p.category?.name || '—'}</td>
+        <td style="font-size:0.8rem">${escapeHtml(p.category?.name) || '—'}</td>
         <td>${p.isFeatured ? '✓' : ''}</td>
         <td>
           <button class="btn btn-outline btn-xs" onclick="productForm('${p._id}')">Edit</button>
-          <button class="btn btn-outline btn-xs" style="color:#dc2626" onclick="deleteProduct('${p._id}','${p.name.replace(/'/g, "\\'")}')">Del</button>
+          <button class="btn btn-outline btn-xs" style="color:#dc2626" onclick="deleteProduct('${p._id}','${escapeHtml(p.name).replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">Del</button>
         </td>
       </tr>`;
     });
@@ -330,10 +341,11 @@ async function uploadProductImage(file) {
   }
 }
 
-function removeProductImage(index) {
+async function removeProductImage(index) {
   const img = pImages[index];
   if (img && img.publicId) {
-    apiFetch(API + '/remove-image', { method: 'POST', body: JSON.stringify({ publicId: img.publicId }) });
+    const r = await apiFetch(API + '/remove-image', { method: 'POST', body: JSON.stringify({ publicId: img.publicId }) });
+    if (!r.success) { toast('Failed to remove image from server'); return; }
   }
   pImages.splice(index, 1);
   renderImageList();
@@ -343,7 +355,7 @@ function productForm(id) {
   pVariants = [];
   pImages = [];
   const isEdit = !!id;
-  const catOpts = categories.map(c => '<option value="' + c._id + '">' + c.name + '</option>').join('');
+  const catOpts = categories.map(c => '<option value="' + c._id + '">' + escapeHtml(c.name) + '</option>').join('');
   openModal(`<h2>${isEdit ? 'Edit' : 'Add'} Product</h2>
     <form id="productForm" style="display:flex;flex-direction:column;gap:12px">
       <div class="form-row">
@@ -357,7 +369,7 @@ function productForm(id) {
         <div class="form-group"><label>Stock</label><input class="form-input" id="pStock" type="number" value="0"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Category</label><select class="form-input" id="pCategory">${catOpts}</select></div>
+        <div class="form-group"><label>Category</label><select class="form-input" id="pCategory">${catOpts || '<option value="">No categories available</option>'}</select></div>
         <div class="form-group"><label>SKU</label><input class="form-input" id="pSku"></div>
       </div>
       <div style="border:1px solid var(--color-gray-100);padding:12px">
@@ -371,6 +383,7 @@ function productForm(id) {
         <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem"><input type="checkbox" id="pFeatured"> Featured</label>
         <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem"><input type="checkbox" id="pBestSeller"> Best Seller</label>
         <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem"><input type="checkbox" id="pNewArrival"> New Arrival</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem"><input type="checkbox" id="pIsActive" checked> Active</label>
       </div>
       <div style="border-top:1px solid var(--color-gray-100);padding-top:12px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -401,6 +414,8 @@ function productForm(id) {
       document.getElementById('pFeatured').checked = !!p.isFeatured;
       document.getElementById('pBestSeller').checked = !!p.isBestSeller;
       document.getElementById('pNewArrival').checked = !!p.isNewArrival;
+      const activeEl = document.getElementById('pIsActive');
+      if (activeEl) activeEl.checked = p.isActive !== false;
       if (p.category) document.getElementById('pCategory').value = p.category._id || p.category;
       if (p.images) { pImages = p.images.map(img => ({ url: img.url || img, publicId: img.publicId || '' })); renderImageList(); }
       if (p.variants) { pVariants = p.variants; renderVariantList(); }
@@ -414,7 +429,7 @@ function productForm(id) {
       slug: document.getElementById('pSlug').value || undefined,
       description: document.getElementById('pDesc').value,
       price: Number(document.getElementById('pPrice').value),
-      comparePrice: Number(document.getElementById('pCompare').value) || undefined,
+      comparePrice: document.getElementById('pCompare').value ? Number(document.getElementById('pCompare').value) : undefined,
       stock: Number(document.getElementById('pStock').value),
       sku: document.getElementById('pSku').value,
       category: document.getElementById('pCategory').value,
@@ -422,6 +437,7 @@ function productForm(id) {
       isFeatured: document.getElementById('pFeatured').checked,
       isBestSeller: document.getElementById('pBestSeller').checked,
       isNewArrival: document.getElementById('pNewArrival').checked,
+      isActive: document.getElementById('pIsActive').checked,
       variants: pVariants,
     };
     const url = isEdit ? API + '/products/' + id : API + '/products';
@@ -446,7 +462,7 @@ function renderVariantList() {
   let t = '';
   pVariants.forEach((v, i) => {
     t += `<div class="variant-row">
-      <span style="flex:1"><strong>${v.name}</strong>${v.sku ? ' · ' + v.sku : ''}</span>
+      <span style="flex:1"><strong>${escapeHtml(v.name)}</strong>${v.sku ? ' · ' + escapeHtml(v.sku) : ''}</span>
       <span>${v.price ? '₦' + Number(v.price).toLocaleString() : '—'}</span>
       <span style="margin:0 12px">Stock: ${v.stock ?? 0}</span>
       <button type="button" class="btn btn-outline btn-xs" onclick="editVariant(${i})">Edit</button>
@@ -461,9 +477,9 @@ function variantForm(index) {
   const v = isEdit ? pVariants[index] : { name: '', sku: '', price: '', stock: 0 };
   openModal(`<h2>${isEdit ? 'Edit' : 'Add'} Variant</h2>
     <form id="variantForm" style="display:flex;flex-direction:column;gap:12px">
-      <div class="form-group"><label>Variant Name</label><input class="form-input" id="vName" value="${v.name}" required placeholder="e.g. Small / Red"></div>
+      <div class="form-group"><label>Variant Name</label><input class="form-input" id="vName" value="${escapeHtml(v.name)}" required placeholder="e.g. Small / Red"></div>
       <div class="form-row">
-        <div class="form-group"><label>SKU</label><input class="form-input" id="vSku" value="${v.sku || ''}"></div>
+        <div class="form-group"><label>SKU</label><input class="form-input" id="vSku" value="${escapeHtml(v.sku || '')}"></div>
         <div class="form-group"><label>Price (override)</label><input class="form-input" id="vPrice" type="number" value="${v.price || ''}"></div>
       </div>
       <div class="form-group"><label>Stock</label><input class="form-input" id="vStock" type="number" value="${v.stock ?? 0}"></div>
@@ -485,7 +501,7 @@ function editVariant(i) { variantForm(i); }
 function removeVariant(i) { pVariants.splice(i, 1); renderVariantList(); }
 
 async function deleteProduct(id, name) {
-  if (!confirm('Delete "' + name + '"?')) return;
+  if (!confirm('Delete "' + name.replace(/&quot;/g, '"').replace(/&#39;/g, "'") + '"?')) return;
   const r = await apiFetch(API + '/products/' + id, { method: 'DELETE' });
   if (r.success) { toast('Product deleted'); loadSection('products'); }
   else { toast(r.message || 'Error'); }
@@ -502,13 +518,13 @@ async function renderCategories(el) {
     t += '<tr><th>Name</th><th>Slug</th><th>Order</th><th>Active</th><th></th></tr>';
     d.data.forEach(c => {
       t += `<tr>
-        <td style="font-weight:500">${c.name}</td>
-        <td style="font-size:0.8rem">${c.slug}</td>
+        <td style="font-weight:500">${escapeHtml(c.name)}</td>
+        <td style="font-size:0.8rem">${escapeHtml(c.slug)}</td>
         <td>${c.order || 0}</td>
         <td>${c.isActive !== false ? '✓' : '✗'}</td>
         <td>
           <button class="btn btn-outline btn-xs" onclick="categoryForm('${c._id}')">Edit</button>
-          <button class="btn btn-outline btn-xs" style="color:#dc2626" onclick="deleteCategory('${c._id}','${c.name.replace(/'/g, "\\'")}')">Del</button>
+          <button class="btn btn-outline btn-xs" style="color:#dc2626" onclick="deleteCategory('${c._id}','${escapeHtml(c.name).replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">Del</button>
         </td>
       </tr>`;
     });
@@ -569,7 +585,7 @@ function categoryForm(id) {
 }
 
 async function deleteCategory(id, name) {
-  if (!confirm('Delete category "' + name + '"?')) return;
+  if (!confirm('Delete category "' + name.replace(/&quot;/g, '"').replace(/&#39;/g, "'") + '"?')) return;
   const r = await apiFetch(API + '/categories/' + id, { method: 'DELETE' });
   if (r.success) { toast('Category deleted'); loadSection('categories'); }
   else { toast(r.message || 'Error'); }

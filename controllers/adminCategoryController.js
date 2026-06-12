@@ -26,11 +26,14 @@ exports.getCategoryById = async (req, res, next) => {
 exports.createCategory = async (req, res, next) => {
   try {
     const { name, description, image, isActive, order } = req.body;
-    let slug = slugify(name || req.body.slug, { lower: true, strict: true });
+    if (!name || !name.trim()) return next(ApiError.badRequest('Category name is required'));
+    let slug = slugify(name, { lower: true, strict: true });
+    if (!slug) slug = slugify(req.body.slug || `category-${Date.now()}`, { lower: true, strict: true });
+    if (!slug) return next(ApiError.badRequest('Could not generate a valid slug'));
     const existing = await Category.findOne({ slug });
     if (existing) slug = `${slug}-${Date.now()}`;
 
-    const category = await Category.create({ name, slug, description, image, isActive, order });
+    const category = await Category.create({ name: name.trim(), slug, description, image, isActive, order });
     ApiResponse.success(res, category, 'Category created successfully', 201);
   } catch (error) {
     next(error);
