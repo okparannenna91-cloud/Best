@@ -7,6 +7,7 @@ const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const fs = require('fs');
 const crypto = require('crypto');
 
 const connectDB = require('./config/db');
@@ -113,10 +114,22 @@ for (const [route, file] of Object.entries(staticPages)) {
 }
 
 app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+  const filePath = path.join(__dirname, 'public', 'admin.html');
+  const html = fs.readFileSync(filePath, 'utf-8');
+  const injected = html.replace(
+    "{{CLERK_PUBLISHABLE_KEY}}",
+    process.env.CLERK_PUBLISHABLE_KEY || ''
+  );
+  res.type('html').send(injected);
 });
 app.get('/admin/*path', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+  const filePath = path.join(__dirname, 'public', 'admin.html');
+  const html = fs.readFileSync(filePath, 'utf-8');
+  const injected = html.replace(
+    "{{CLERK_PUBLISHABLE_KEY}}",
+    process.env.CLERK_PUBLISHABLE_KEY || ''
+  );
+  res.type('html').send(injected);
 });
 
 app.get('/robots.txt', (req, res) => {
