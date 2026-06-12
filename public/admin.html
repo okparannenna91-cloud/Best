@@ -166,7 +166,14 @@ function escapeHtml(str) {
 }
 
 function imgUrl(img) {
-  return img ? (img.url || img) : '';
+  if (!img) return '';
+  const raw = img.url || img;
+  return String(raw).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function formatPrice(val) {
+  if (val == null || isNaN(val)) return '—';
+  return '₦' + Number(val).toLocaleString();
 }
 
 function showView(view) {
@@ -267,7 +274,7 @@ async function renderDashboard(el) {
     r.data.forEach(p => {
       t += `<tr><td>${p.images?.[0] ? '<div class="image-preview"><img src="' + imgUrl(p.images[0]) + '" onerror="this.style.display=\'none\'"></div>' : ''}</td>
         <td style="font-weight:500">${escapeHtml(p.name)}</td>
-        <td>₦${Number(p.price).toLocaleString()}</td>
+        <td>${formatPrice(p.price)}</td>
         <td style="color:${p.stock <= 5 ? '#dc2626' : 'inherit'}">${p.stock ?? '—'}</td></tr>`;
     });
     t += '</table>';
@@ -291,13 +298,13 @@ async function renderProducts(el) {
       t += `<tr>
         <td>${img}</td>
         <td style="font-weight:500">${escapeHtml(p.name)}</td>
-        <td>₦${Number(p.price).toLocaleString()}</td>
+        <td>${formatPrice(p.price)}</td>
         <td style="color:${p.stock <= 5 ? '#dc2626' : 'inherit'}">${p.stock ?? '—'}</td>
         <td style="font-size:0.8rem">${escapeHtml(p.category?.name) || '—'}</td>
         <td>${p.isFeatured ? '✓' : ''}</td>
         <td>
-          <button class="btn btn-outline btn-xs" onclick="productForm('${p._id}')">Edit</button>
-          <button class="btn btn-outline btn-xs" style="color:#dc2626" onclick="deleteProduct('${p._id}','${escapeHtml(p.name).replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">Del</button>
+          <button class="btn btn-outline btn-xs" onclick="productForm('${String(p._id).replace(/'/g, "\\'")}')">Edit</button>
+          <button class="btn btn-outline btn-xs" style="color:#dc2626" onclick="deleteProduct('${String(p._id).replace(/'/g, "\\'")}','${escapeHtml(p.name).replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">Del</button>
         </td>
       </tr>`;
     });
@@ -355,7 +362,7 @@ function productForm(id) {
   pVariants = [];
   pImages = [];
   const isEdit = !!id;
-  const catOpts = categories.map(c => '<option value="' + c._id + '">' + escapeHtml(c.name) + '</option>').join('');
+  const catOpts = categories.length ? categories.map(c => '<option value="' + c._id + '">' + escapeHtml(c.name) + '</option>').join('') : '<option value="">No categories — create one first</option>';
   openModal(`<h2>${isEdit ? 'Edit' : 'Add'} Product</h2>
     <form id="productForm" style="display:flex;flex-direction:column;gap:12px">
       <div class="form-row">
@@ -369,7 +376,7 @@ function productForm(id) {
         <div class="form-group"><label>Stock</label><input class="form-input" id="pStock" type="number" value="0"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Category</label><select class="form-input" id="pCategory">${catOpts || '<option value="">No categories available</option>'}</select></div>
+        <div class="form-group"><label>Category</label><select class="form-input" id="pCategory">${catOpts}</select></div>
         <div class="form-group"><label>SKU</label><input class="form-input" id="pSku"></div>
       </div>
       <div style="border:1px solid var(--color-gray-100);padding:12px">
@@ -402,7 +409,7 @@ function productForm(id) {
 
   if (isEdit) {
     apiFetch(API + '/products/' + id).then(r => {
-      if (!r.success) return;
+      if (!r.success) { toast('Failed to load product'); closeModal(); return; }
       const p = r.data;
       document.getElementById('pName').value = p.name;
       document.getElementById('pSlug').value = p.slug || '';
@@ -424,6 +431,9 @@ function productForm(id) {
 
   document.getElementById('productForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (!document.getElementById('pCategory').value) {
+      toast('Please select a category'); return;
+    }
     const body = {
       name: document.getElementById('pName').value,
       slug: document.getElementById('pSlug').value || undefined,
@@ -463,7 +473,7 @@ function renderVariantList() {
   pVariants.forEach((v, i) => {
     t += `<div class="variant-row">
       <span style="flex:1"><strong>${escapeHtml(v.name)}</strong>${v.sku ? ' · ' + escapeHtml(v.sku) : ''}</span>
-      <span>${v.price ? '₦' + Number(v.price).toLocaleString() : '—'}</span>
+      <span>${v.price != null && v.price !== '' ? '₦' + Number(v.price).toLocaleString() : '—'}</span>
       <span style="margin:0 12px">Stock: ${v.stock ?? 0}</span>
       <button type="button" class="btn btn-outline btn-xs" onclick="editVariant(${i})">Edit</button>
       <button type="button" class="btn btn-outline btn-xs" style="color:#dc2626" onclick="removeVariant(${i})">×</button>
@@ -480,7 +490,7 @@ function variantForm(index) {
       <div class="form-group"><label>Variant Name</label><input class="form-input" id="vName" value="${escapeHtml(v.name)}" required placeholder="e.g. Small / Red"></div>
       <div class="form-row">
         <div class="form-group"><label>SKU</label><input class="form-input" id="vSku" value="${escapeHtml(v.sku || '')}"></div>
-        <div class="form-group"><label>Price (override)</label><input class="form-input" id="vPrice" type="number" value="${v.price || ''}"></div>
+        <div class="form-group"><label>Price (override)</label><input class="form-input" id="vPrice" type="number" value="${v.price != null ? v.price : ''}"></div>
       </div>
       <div class="form-group"><label>Stock</label><input class="form-input" id="vStock" type="number" value="${v.stock ?? 0}"></div>
       <div class="modal-actions">
@@ -523,8 +533,8 @@ async function renderCategories(el) {
         <td>${c.order || 0}</td>
         <td>${c.isActive !== false ? '✓' : '✗'}</td>
         <td>
-          <button class="btn btn-outline btn-xs" onclick="categoryForm('${c._id}')">Edit</button>
-          <button class="btn btn-outline btn-xs" style="color:#dc2626" onclick="deleteCategory('${c._id}','${escapeHtml(c.name).replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">Del</button>
+          <button class="btn btn-outline btn-xs" onclick="categoryForm('${String(c._id).replace(/'/g, "\\'")}')">Edit</button>
+          <button class="btn btn-outline btn-xs" style="color:#dc2626" onclick="deleteCategory('${String(c._id).replace(/'/g, "\\'")}','${escapeHtml(c.name).replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">Del</button>
         </td>
       </tr>`;
     });
@@ -556,7 +566,7 @@ function categoryForm(id) {
     </form>`);
   if (isEdit) {
     apiFetch(API + '/categories/' + id).then(r => {
-      if (!r.success) return;
+      if (!r.success) { toast('Failed to load category'); closeModal(); return; }
       const c = r.data;
       document.getElementById('catName').value = c.name;
       document.getElementById('catSlug').value = c.slug || '';
@@ -568,6 +578,9 @@ function categoryForm(id) {
   }
   document.getElementById('categoryForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (!document.getElementById('catName').value.trim()) {
+      toast('Category name is required'); return;
+    }
     const body = {
       name: document.getElementById('catName').value,
       slug: document.getElementById('catSlug').value || undefined,
