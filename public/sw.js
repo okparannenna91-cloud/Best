@@ -6,6 +6,14 @@ const STATIC_ASSETS = [
   '/categories',
   '/css/style.css',
   '/js/main.js',
+  '/js/shop.js',
+  '/js/product.js',
+  '/js/auth.js',
+  '/sign-in',
+  '/sign-up',
+  '/account',
+  '/contact',
+  '/about',
 ];
 
 self.addEventListener('install', (event) => {
@@ -35,7 +43,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
 
   if (url.pathname.startsWith('/api/')) {
-    event.respondWith(networkFirst(request));
+    event.respondWith(networkFirst(request, 8000));
     return;
   }
 
@@ -50,16 +58,19 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (request.mode === 'navigate') {
-    event.respondWith(networkFirst(request));
+    event.respondWith(networkFirst(request, 6000));
     return;
   }
 
-  event.respondWith(networkFirst(request));
+  event.respondWith(networkFirst(request, 6000));
 });
 
-async function networkFirst(request) {
+async function networkFirst(request, timeoutMs) {
   try {
-    const response = await fetch(request);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs || 5000);
+    const response = await fetch(request, { signal: controller.signal });
+    clearTimeout(timer);
     if (response.ok) {
       const cache = await caches.open(CACHE_NAME);
       cache.put(request, response.clone());
