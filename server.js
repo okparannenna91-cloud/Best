@@ -31,7 +31,7 @@ app.use(helmet({
       frameAncestors: ["'self'"],
       imgSrc: ["'self'", "data:", "https://img.clerk.com"],
       objectSrc: ["'none'"],
-      scriptSrc: ["'self'", "https://cdn.jsdelivr.net", "https://clerk.sollene.site", "https://challenges.cloudflare.com"],
+      scriptSrc: ["'self'", "https://cdn.jsdelivr.net", "https://clerk.sollene.site", "https://challenges.cloudflare.com", "'unsafe-inline'"],
       scriptSrcAttr: ["'none'"],
       workerSrc: ["'self'", "blob:"],
       styleSrc: ["'self'", "https:", "'unsafe-inline'"],
@@ -66,6 +66,22 @@ app.use(cookieParser());
 
 // CSRF protection via SameSite cookie policy
 app.set('trust proxy', 1);
+
+const ADMIN_USER_ID = process.env.CLERK_ADMIN_USER_ID || '';
+function serveAdminHtml(req, res) {
+  const filePath = path.join(__dirname, 'public', 'admin.html');
+  const html = fs.readFileSync(filePath, 'utf-8');
+  const injected = html
+    .replace("{{CLERK_PUBLISHABLE_KEY}}", process.env.CLERK_PUBLISHABLE_KEY || '')
+    .replace("{{ADMIN_USER_ID}}", ADMIN_USER_ID);
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  res.type('html').send(injected);
+}
+app.get('/admin', serveAdminHtml);
+app.get('/admin/*path', serveAdminHtml);
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -112,21 +128,6 @@ for (const [route, file] of Object.entries(staticPages)) {
     res.sendFile(path.join(__dirname, 'public', file));
   });
 }
-
-const ADMIN_USER_ID = process.env.CLERK_ADMIN_USER_ID || '';
-function serveAdminHtml(req, res) {
-  const filePath = path.join(__dirname, 'public', 'admin.html');
-  const html = fs.readFileSync(filePath, 'utf-8');
-  const injected = html
-    .replace("{{CLERK_PUBLISHABLE_KEY}}", process.env.CLERK_PUBLISHABLE_KEY || '')
-    .replace("{{ADMIN_USER_ID}}", ADMIN_USER_ID);
-  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-  res.set('Pragma', 'no-cache');
-  res.set('Expires', '0');
-  res.type('html').send(injected);
-}
-app.get('/admin', serveAdminHtml);
-app.get('/admin/*path', serveAdminHtml);
 
 app.get('/robots.txt', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'robots.txt'));
