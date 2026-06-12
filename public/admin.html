@@ -171,7 +171,7 @@ function imgUrl(img) {
   return String(raw).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-function formatPrice(val) {
+function fmtPrice(val) {
   if (val == null || isNaN(val)) return '—';
   return '₦' + Number(val).toLocaleString();
 }
@@ -286,7 +286,7 @@ async function renderDashboard(el) {
     r.data.forEach(p => {
       t += `<tr><td>${p.images?.[0] ? '<div class="image-preview"><img src="' + imgUrl(p.images[0]) + '" onerror="this.style.display=\'none\'"></div>' : ''}</td>
         <td style="font-weight:500">${escapeHtml(p.name)}</td>
-        <td>${formatPrice(p.price)}</td>
+        <td>${fmtPrice(p.price)}</td>
         <td style="color:${p.stock <= 5 ? '#dc2626' : 'inherit'}">${p.stock ?? '—'}</td></tr>`;
     });
     t += '</table>';
@@ -310,7 +310,7 @@ async function renderProducts(el) {
       t += `<tr>
         <td>${img}</td>
         <td style="font-weight:500">${escapeHtml(p.name)}</td>
-        <td>${formatPrice(p.price)}</td>
+        <td>${fmtPrice(p.price)}</td>
         <td style="color:${p.stock <= 5 ? '#dc2626' : 'inherit'}">${p.stock ?? '—'}</td>
         <td style="font-size:0.8rem">${escapeHtml(p.category?.name) || '—'}</td>
         <td>${p.isFeatured ? '✓' : ''}</td>
