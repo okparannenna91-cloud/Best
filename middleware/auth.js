@@ -1,6 +1,7 @@
 const { clerkClient } = require('@clerk/clerk-sdk-node');
-const User = require('../models/User');
 const ApiError = require('../utils/ApiError');
+
+const ADMIN_USER_ID = process.env.CLERK_ADMIN_USER_ID || 'user_3F2Nq8Lyzx9fVq2qhQGsnv6Sjjd';
 
 async function verifyClerkSession(sessionToken) {
   const decoded = JSON.parse(Buffer.from(sessionToken.split('.')[1], 'base64url').toString());
@@ -8,6 +9,17 @@ async function verifyClerkSession(sessionToken) {
   if (!sessionId) return null;
   const session = await clerkClient.sessions.verifySession(sessionId, sessionToken);
   return session;
+}
+
+function buildUser(clerkUser) {
+  return {
+    clerkId: clerkUser.id,
+    email: clerkUser.emailAddresses?.[0]?.emailAddress || '',
+    firstName: clerkUser.firstName,
+    lastName: clerkUser.lastName,
+    avatar: clerkUser.imageUrl,
+    isAdmin: clerkUser.id === ADMIN_USER_ID,
+  };
 }
 
 const authenticate = async (req, res, next) => {
@@ -25,21 +37,8 @@ const authenticate = async (req, res, next) => {
     }
 
     const clerkUser = await clerkClient.users.getUser(session.userId);
-    let user = await User.findOne({ clerkId: session.userId });
 
-    if (!user) {
-      user = await User.create({
-        clerkId: session.userId,
-        email: clerkUser.emailAddresses[0]?.emailAddress || '',
-        firstName: clerkUser.firstName,
-        lastName: clerkUser.lastName,
-        avatar: clerkUser.imageUrl,
-      });
-    }
-
-    await autoPromoteAdmin(user, session.userId);
-
-    req.user = user;
+    req.user = buildUser(clerkUser);
     req.clerkUserId = session.userId;
     next();
   } catch (error) {
@@ -56,16 +55,7 @@ const optionalAuth = async (req, res, next) => {
 
     if (session) {
       const clerkUser = await clerkClient.users.getUser(session.userId);
-      let user = await User.findOne({ clerkId: session.userId });
-      if (!user) {
-        user = await User.create({
-          clerkId: session.userId,
-          email: clerkUser.emailAddresses[0]?.emailAddress || '',
-          firstName: clerkUser.firstName,
-          lastName: clerkUser.lastName,
-        });
-      }
-      req.user = user;
+      req.user = buildUser(clerkUser);
       req.clerkUserId = session.userId;
     }
   } catch (_) {
@@ -73,15 +63,6 @@ const optionalAuth = async (req, res, next) => {
   }
   next();
 };
-
-const ADMIN_USER_ID = process.env.CLERK_ADMIN_USER_ID || 'user_3F2Nq8Lyzx9fVq2qhQGsnv6Sjjd';
-
-async function autoPromoteAdmin(user, clerkUserId) {
-  if (clerkUserId === ADMIN_USER_ID && !user.isAdmin) {
-    user.isAdmin = true;
-    await user.save();
-  }
-}
 
 const requireAdmin = (req, res, next) => {
   if (!req.user || req.clerkUserId !== ADMIN_USER_ID) {
