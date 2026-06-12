@@ -28,33 +28,6 @@
     data-clerk-publishable-key="pk_live_Y2xlcmsuc29sbGVuZS5zaXRlJA"
     crossorigin="anonymous"
   ></script>
-  <script>
-    async function initClerk() {
-      if (!window.Clerk) return;
-      await window.Clerk.load();
-
-      const el = document.getElementById('clerk-sign-up');
-      if (el) {
-        window.Clerk.mountSignUp(el, {
-          signInUrl: '/sign-in',
-          afterSignUpUrl: '/account',
-          appearance: {
-            variables: {
-              colorPrimary: '#000000',
-              colorTextOnPrimaryBackground: '#ffffff',
-              fontFamily: 'Inter, sans-serif',
-              borderRadius: '8px',
-            }
-          }
-        });
-      }
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initClerk);
-    } else {
-      initClerk();
-    }
-  </script>
+  <script src="/js/auth.js"></script>
 </body>
 </html>
