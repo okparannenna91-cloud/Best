@@ -4,14 +4,22 @@
 
 const API_BASE = '/api';
 
-// --- Get slug from URL ---
+let whatsappNumber = '2348000000000';
+
+async function loadWhatsAppConfig() {
+  try {
+    const res = await fetch(`${API_BASE}/config`);
+    const data = await res.json();
+    if (data.whatsappNumber) whatsappNumber = data.whatsappNumber;
+  } catch (_) {}
+}
+
 function getProductSlug() {
   const path = window.location.pathname;
   const match = path.match(/\/product\/(.+)/);
   return match ? match[1] : null;
 }
 
-// --- Recently viewed (localStorage) ---
 function addToRecentlyViewed(product) {
   let viewed = JSON.parse(localStorage.getItem('sollene_recently_viewed') || '[]');
   viewed = viewed.filter((v) => v._id !== product._id);
@@ -51,7 +59,6 @@ function renderRecentlyViewed() {
   `).join('');
 }
 
-// --- Fetch product ---
 async function fetchProduct(slug) {
   try {
     const res = await fetch(`${API_BASE}/products/${slug}`);
@@ -73,19 +80,7 @@ async function fetchRelatedProducts(productId) {
   }
 }
 
-async function fetchProductReviews(productId) {
-  try {
-    const res = await fetch(`${API_BASE}/reviews/product/${productId}?limit=100`);
-    const data = await res.json();
-    return data;
-  } catch (err) {
-    return null;
-  }
-}
-
-// --- Render product ---
 function renderProduct(product) {
-  // Meta
   document.getElementById('metaTitle').textContent = `${product.name} — SOLLENE`;
   document.getElementById('metaDesc').textContent = product.description || '';
   document.getElementById('ogTitle').textContent = `${product.name} — SOLLENE`;
@@ -94,18 +89,14 @@ function renderProduct(product) {
   document.getElementById('ogImage').content = product.images?.[0] || '';
   document.getElementById('canonical').href = window.location.href;
 
-  // Breadcrumbs
   document.getElementById('breadcrumbCategory').textContent = product.category?.name || '';
   document.getElementById('breadcrumbProduct').textContent = product.name;
 
-  // Gallery
   renderGallery(product.images || []);
 
-  // Info
   document.getElementById('productCategory').textContent = product.category?.name || '';
   document.getElementById('productTitle').textContent = product.name;
 
-  // Rating
   const stars = Math.round(product.ratingsAverage || 0);
   const starHTML = Array.from({ length: 5 }, (_, i) =>
     `<span>${i < stars ? '★' : '☆'}</span>`
@@ -115,7 +106,6 @@ function renderProduct(product) {
     <span>${product.ratingsAverage || '0'} (${product.ratingsCount || 0} reviews)</span>
   `;
 
-  // Price
   let priceHTML = `<span class="current-price">${formatPrice(product.price)}</span>`;
   if (product.comparePrice) {
     const discount = Math.round((1 - product.price / product.comparePrice) * 100);
@@ -124,7 +114,6 @@ function renderProduct(product) {
   }
   document.getElementById('productPrice').innerHTML = priceHTML;
 
-  // Stock
   const stockEl = document.getElementById('productStock');
   if (product.stock > 10) {
     stockEl.innerHTML = `<span class="stock-dot in-stock"></span><span class="stock-text in-stock">In Stock</span>`;
@@ -132,38 +121,25 @@ function renderProduct(product) {
     stockEl.innerHTML = `<span class="stock-dot low-stock"></span><span class="stock-text low-stock">Only ${product.stock} left</span>`;
   } else {
     stockEl.innerHTML = `<span class="stock-dot out-of-stock"></span><span class="stock-text out-of-stock">Out of Stock</span>`;
-    document.getElementById('addToCartBtn').disabled = true;
-    document.getElementById('addToCartBtn').textContent = 'Out of Stock';
-    document.getElementById('buyNowBtn').disabled = true;
   }
 
-  // Description
   document.getElementById('productDescription').innerHTML = product.description || '';
-
-  // Variants
   renderVariants(product.variants || []);
 
-  // Show content, hide skeleton
   document.querySelector('.product-info-skeleton')?.classList.add('hidden');
   document.getElementById('productInfoContent')?.classList.remove('hidden');
 
-  // Tabs
   renderDescription(product.description || '');
   renderSpecs(product);
-  loadReviews(product._id);
 
-  // Related products
   loadRelatedProducts(product._id);
 
-  // Recently viewed
   addToRecentlyViewed(product);
   renderRecentlyViewed();
 
-  // Store product data for cart
   window._currentProduct = product;
 }
 
-// --- Gallery ---
 function renderGallery(images) {
   const mainImg = document.getElementById('mainImage');
   const thumbsContainer = document.getElementById('galleryThumbs');
@@ -181,7 +157,6 @@ function renderGallery(images) {
     </div>
   `).join('');
 
-  // Thumb click
   thumbsContainer.querySelectorAll('.gallery-thumb').forEach((thumb) => {
     thumb.addEventListener('click', () => {
       const idx = parseInt(thumb.dataset.index);
@@ -191,11 +166,9 @@ function renderGallery(images) {
     });
   });
 
-  // Zoom
   initZoom(images);
 }
 
-// --- Zoom (lens + overlay) ---
 function initZoom(images) {
   const wrapper = document.querySelector('.gallery-image-wrapper');
   const mainImg = document.getElementById('mainImage');
@@ -220,7 +193,6 @@ function initZoom(images) {
     zoomResult.style.backgroundImage = '';
   });
 
-  // Fullscreen zoom overlay
   document.getElementById('zoomBtn')?.addEventListener('click', () => {
     document.getElementById('zoomImage').src = mainImg.src;
     document.getElementById('zoomOverlay').classList.add('open');
@@ -240,7 +212,6 @@ function initZoom(images) {
   });
 }
 
-// --- Variants ---
 function renderVariants(variants) {
   const container = document.getElementById('productVariants');
   if (!variants.length) { container?.classList.add('hidden'); return; }
@@ -277,7 +248,6 @@ function renderVariants(variants) {
   });
 }
 
-// --- Tabs ---
 function renderDescription(desc) {
   document.getElementById('tabDescriptionContent').innerHTML = desc || 'No description available.';
 }
@@ -303,61 +273,6 @@ function renderSpecs(product) {
   `).join('');
 }
 
-// --- Reviews ---
-async function loadReviews(productId) {
-  const data = await fetchProductReviews(productId);
-  const container = document.getElementById('tabReviewsContent');
-  const countEl = document.getElementById('reviewsCount');
-
-  if (!data?.data || data.data.length === 0) {
-    countEl.textContent = '0';
-    container.innerHTML = '<p style="color:var(--color-gray-400);padding:32px 0;">No reviews yet. Be the first to review this product.</p>';
-    return;
-  }
-
-  const reviews = data.data;
-  countEl.textContent = reviews.length;
-
-  // Calculate distribution
-  const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-  reviews.forEach((r) => { if (dist[r.rating] !== undefined) dist[r.rating]++; });
-  const avg = (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1);
-
-  let html = `
-    <div class="reviews-summary">
-      <div class="reviews-average">
-        <div class="big-number">${avg}</div>
-        <div class="stars">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5 - Math.round(avg))}</div>
-        <div class="count">${reviews.length} review${reviews.length !== 1 ? 's' : ''}</div>
-      </div>
-      <div class="reviews-bars">
-        ${[5,4,3,2,1].map((star) => `
-          <div class="review-bar-row">
-            <span class="bar-label">${star}</span>
-            <div class="bar-track"><div class="bar-fill" style="width:${(dist[star] / reviews.length * 100)}%"></div></div>
-            <span class="bar-count">${dist[star]}</span>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `;
-
-  html += reviews.map((r) => `
-    <div class="review-item">
-      <div class="review-item-header">
-        <div class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
-        ${r.title ? `<span class="review-item-title">${r.title}</span>` : ''}
-        <span class="review-item-date">${new Date(r.createdAt).toLocaleDateString()}</span>
-      </div>
-      <div class="review-item-text">${r.comment || ''}</div>
-      <div class="review-item-author">${r.user?.firstName || 'Verified'} ${r.user?.lastName || 'Customer'}${r.isVerifiedPurchase ? ' · Verified Purchase' : ''}</div>
-    </div>
-  `).join('');
-
-  container.innerHTML = html;
-}
-
-// --- Related Products ---
 async function loadRelatedProducts(productId) {
   const products = await fetchRelatedProducts(productId);
   const container = document.getElementById('relatedProducts');
@@ -368,16 +283,10 @@ async function loadRelatedProducts(productId) {
   }
 
   container.innerHTML = products.map((p) => {
-    const pJSON = JSON.stringify({ _id: p._id, name: p.name, price: p.price, images: p.images }).replace(/'/g, "&#39;");
     return `
       <div class="product-card fade-in" data-product-id="${p._id}" onclick="window.location='/product/${p.slug}'">
         <div class="product-card-image">
           <img src="${p.images?.[0] || ''}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'">
-          <div class="product-card-actions">
-            <button onclick="event.stopPropagation();addToCart(${pJSON});return false;" title="Add to cart">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            </button>
-          </div>
         </div>
         <div class="product-card-info">
           <span class="product-card-category">${p.category?.name || ''}</span>
@@ -389,31 +298,6 @@ async function loadRelatedProducts(productId) {
   }).join('');
 }
 
-// --- Wishlist toggle on product page ---
-function initProductWishlist(productId) {
-  const btn = document.getElementById('productWishlistBtn');
-  if (!btn) return;
-
-  let wishlist = JSON.parse(localStorage.getItem('sollene_wishlist') || '[]');
-  if (wishlist.includes(productId)) {
-    btn.querySelector('svg').setAttribute('fill', 'currentColor');
-  }
-
-  btn.addEventListener('click', () => {
-    const idx = wishlist.indexOf(productId);
-    if (idx > -1) {
-      wishlist.splice(idx, 1);
-      btn.querySelector('svg').setAttribute('fill', 'none');
-    } else {
-      wishlist.push(productId);
-      btn.querySelector('svg').setAttribute('fill', 'currentColor');
-    }
-    localStorage.setItem('sollene_wishlist', JSON.stringify(wishlist));
-    document.getElementById('wishlistBadge').textContent = wishlist.length;
-  });
-}
-
-// --- Share ---
 function initShare() {
   document.getElementById('shareBtn')?.addEventListener('click', () => {
     if (navigator.share) {
@@ -431,7 +315,6 @@ function initShare() {
   });
 }
 
-// --- Quantity ---
 function initQuantity() {
   const input = document.getElementById('qtyInput');
   document.getElementById('qtyDecrease')?.addEventListener('click', () => {
@@ -450,52 +333,17 @@ function initQuantity() {
   });
 }
 
-// --- Add to Cart from product page ---
-function initAddToCart() {
-  document.getElementById('addToCartBtn')?.addEventListener('click', () => {
+function initOrderWhatsApp() {
+  document.getElementById('orderWhatsAppBtn')?.addEventListener('click', () => {
     const product = window._currentProduct;
     if (!product) return;
     const qty = parseInt(document.getElementById('qtyInput').value) || 1;
-    const cart = JSON.parse(localStorage.getItem('sollene_cart') || '[]');
-    const existing = cart.find((i) => i._id === product._id);
-    if (existing) {
-      existing.quantity += qty;
-    } else {
-      cart.push({
-        _id: product._id,
-        name: product.name,
-        price: product.price,
-        image: product.images?.[0] || '',
-        quantity: qty,
-      });
-    }
-    localStorage.setItem('sollene_cart', JSON.stringify(cart));
-    updateCartBadge();
-    renderCartDrawer();
-    openCart();
+    const message = `Hello SOLLENE! I'd like to order:\n\n*${product.name}*\nPrice: ${formatPrice(product.price)}\nQuantity: ${qty}\n\nPlease provide more details.`;
+    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
   });
 }
 
-// --- Buy Now ---
-function initBuyNow() {
-  document.getElementById('buyNowBtn')?.addEventListener('click', () => {
-    const product = window._currentProduct;
-    if (!product) return;
-    const qty = parseInt(document.getElementById('qtyInput').value) || 1;
-    const cart = [{
-      _id: product._id,
-      name: product.name,
-      price: product.price,
-      image: product.images?.[0] || '',
-      quantity: qty,
-    }];
-    localStorage.setItem('sollene_cart', JSON.stringify(cart));
-    updateCartBadge();
-    window.location = '/checkout';
-  });
-}
-
-// --- Tabs init ---
 function initTabs() {
   document.querySelectorAll('.tab-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -508,8 +356,9 @@ function initTabs() {
   });
 }
 
-// --- Init ---
 document.addEventListener('DOMContentLoaded', async () => {
+  await loadWhatsAppConfig();
+
   const slug = getProductSlug();
   if (!slug) {
     document.querySelector('.product-detail').innerHTML = '<p style="text-align:center;padding:80px 0;color:var(--color-gray-400)">Product not found.</p>';
@@ -523,12 +372,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   renderProduct(product);
-  initProductWishlist(product._id);
   initQuantity();
-  initAddToCart();
-  initBuyNow();
+  initOrderWhatsApp();
   initTabs();
   initShare();
   renderRecentlyViewed();
-  if (typeof initFlashSales === 'function') setTimeout(initFlashSales, 100);
 });

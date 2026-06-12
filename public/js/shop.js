@@ -17,7 +17,6 @@ let currentState = {
 
 let categoriesCache = null;
 
-// --- URL helpers ---
 function getQueryFromState() {
   const params = new URLSearchParams();
   if (currentState.page > 1) params.set('page', currentState.page);
@@ -43,7 +42,6 @@ function getStateFromQuery() {
   currentState.inStock = params.get('inStock') === 'true';
 }
 
-// --- API ---
 async function fetchProducts() {
   const params = new URLSearchParams({
     page: currentState.page,
@@ -78,7 +76,6 @@ async function fetchCategories() {
   }
 }
 
-// --- Render ---
 function renderProducts(products) {
   const container = document.getElementById('shopProducts');
   const empty = document.getElementById('shopEmpty');
@@ -97,23 +94,12 @@ function renderProducts(products) {
       `<span class="star">${i < stars ? '★' : '☆'}</span>`
     ).join('');
 
-    const pJSON = JSON.stringify({ _id: p._id, name: p.name, price: p.price, images: p.images })
-      .replace(/'/g, "&#39;");
-
     return `
       <div class="product-card fade-in" data-product-id="${p._id}" onclick="window.location='/product/${p.slug}'">
         <div class="product-card-image">
           <img src="${p.images?.[0] || ''}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'">
           ${p.badge ? `<span class="product-badge">${p.badge}</span>` : ''}
           ${p.comparePrice ? `<span class="product-badge" style="left:auto;right:12px;background:var(--color-white);color:var(--color-black);">${Math.round((1 - p.price / p.comparePrice) * 100)}% OFF</span>` : ''}
-          <div class="product-card-actions">
-            <button onclick="event.stopPropagation();addToCart(${pJSON});return false;" title="Add to cart">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            </button>
-            <button onclick="event.stopPropagation();toggleWishlist('${p._id}', this);return false;" title="Add to wishlist">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            </button>
-          </div>
         </div>
         <div class="product-card-info">
           <span class="product-card-category">${p.category?.name || ''}</span>
@@ -131,7 +117,6 @@ function renderProducts(products) {
     `;
   }).join('');
 
-  // Lazy trigger fade-in
   requestAnimationFrame(() => {
     document.querySelectorAll('.fade-in').forEach((el, i) => {
       setTimeout(() => el.classList.add('visible'), i * 50);
@@ -177,7 +162,7 @@ function renderCategoryFilters(categories) {
   const container = document.getElementById('categoryFilters');
   if (!container) return;
 
-  html = `<label class="filter-option">
+  let html = `<label class="filter-option">
     <input type="radio" name="category" value="" ${!currentState.category ? 'checked' : ''}>
     All Categories
   </label>`;
@@ -225,7 +210,6 @@ function renderActiveFilters() {
   container.innerHTML = tags;
 }
 
-// --- Actions ---
 window.goToPage = function (page) {
   currentState.page = page;
   updateShop();
@@ -278,19 +262,16 @@ async function updateShop() {
   if (!data) return;
 
   renderProducts(data.data);
-  if (typeof initFlashSales === 'function') initFlashSales();
   renderPagination(data.data.length, data.pagination.page, data.pagination.pages);
   updateResultsCount(data.pagination.total);
 }
 
-// --- Init ---
 async function initShop() {
   getStateFromQuery();
 
   const categories = await fetchCategories();
   renderCategoryFilters(categories);
 
-  // Sync UI state
   document.getElementById('shopSearch').value = currentState.search;
   document.getElementById('minPrice').value = currentState.minPrice;
   document.getElementById('maxPrice').value = currentState.maxPrice;
@@ -299,7 +280,6 @@ async function initShop() {
 
   await updateShop();
 
-  // Event listeners
   let searchTimeout;
   document.getElementById('shopSearch').addEventListener('input', (e) => {
     clearTimeout(searchTimeout);
@@ -332,14 +312,12 @@ async function initShop() {
   document.getElementById('clearFilters').addEventListener('click', clearAllFilters);
   document.getElementById('resetFromEmpty').addEventListener('click', clearAllFilters);
 
-  // Filter accordion
   document.querySelectorAll('.filter-header').forEach((h) => {
     h.addEventListener('click', () => {
       h.parentElement.classList.toggle('open');
     });
   });
 
-  // Mobile sidebar
   document.getElementById('mobileFilterBtn').addEventListener('click', () => {
     document.querySelector('.shop-sidebar').classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -350,7 +328,6 @@ async function initShop() {
     document.body.style.overflow = '';
   });
 
-  // Open first filter group by default
   document.querySelector('.filter-group')?.classList.add('open');
 }
 

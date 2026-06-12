@@ -1,360 +1,369 @@
-Build a modern, production-ready eCommerce website called **SOLLENE** for a small retail business that sells household items, clothing, deodorants, personal care products, and general lifestyle products.
+SOLLENE - MVP PRODUCT SHOWCASE WEBSITE
 
-Brand Information:
-
-* Brand Name: SOLLENE
-* Domain: sollene.site
-* Tagline: Elevating Everyday Living
-* Brand Style: Premium, Minimal, Elegant, Trustworthy, Modern
-* The website should consistently display and reinforce the SOLLENE brand identity across all pages, emails, checkout flows, customer dashboards, and marketing sections.
-
-Tech Stack:
-
-* [x] Frontend: HTML, CSS, Vanilla JavaScript
-* [x] Backend: Node.js + Express
-* [x] Database: MongoDB
-* [x] Authentication: Clerk
-* [⚡] Payments: Paystack
-* [⚡] Emails: Resend
-* [⚡] Deployment: Vercel
-
-Design Theme:
-
-* [x] Premium black and white aesthetic
-* [x] Dominantly black with white accents
-* [x] Modern luxury retail feel
-* [x] Clean typography
-* [x] Smooth animations
-* [x] Fast loading
-* [x] Mobile-first responsive design
-* [x] Elegant micro-interactions
-* [x] Professional shopping experience similar to modern Shopify stores
-* [x] The website should feel like a premium lifestyle brand rather than a generic online store
-
-Core Goals:
-
-* [x] Extremely easy navigation
-* [x] Fast checkout process
-* [x] High conversion rate
-* [x] Trust-building UI
-* [x] Mobile optimized
-* [x] SEO friendly
-* [⚡] Accessible design
-* [x] Scalable architecture
+Build a modern, production-ready product showcase website called SOLLENE for a small retail business that sells household items, clothing, deodorants, personal care products, and general lifestyle products.
 
 ====================================
-1. PUBLIC PAGES
+BRAND INFORMATION
+=================
 
-Landing Page (/):
-  [x] Sticky navigation bar
-  [x] SOLLENE logo section
-  [x] Search bar
-  [x] Category navigation
-  [x] Hero section with CTA buttons
-  [x] Promotional banner
-  [x] Featured products section
-  [x] New arrivals section
-  [x] Best sellers section
-  [x] Categories showcase
-  [x] Why shop with us section
-  [x] Customer reviews section
-  [x] Newsletter signup
-  [x] FAQ section
-  [x] Footer with links
-  [x] Display brand messaging and trust indicators
-  [x] Include call-to-action sections encouraging users to shop products
+Brand Name:
+SOLLENE
 
-Product Listing Page (/shop):
-  [x] Product grid layout
-  [x] Search products
-  [x] Category filters
-  [x] Price filters
-  [x] Availability filters
-  [x] Sort by:
-    [x] Newest
-    [x] Price low-high
-    [x] Price high-low
-    [x] Best selling
-    [x] Featured
-  [x] Pagination
-  [x] Quick add to cart
+Domain:
+sollene.site
 
-Product Details Page (/product/:slug):
-  [x] Product image gallery
-  [x] Zoom functionality
-  [x] Product information
-  [x] Price
-  [x] Discount badge
-  [x] Stock status
-  [x] Quantity selector
-  [x] Add to cart button
-  [x] Buy now button
-  [x] Product specifications
-  [x] Product description
-  [x] Related products
-  [x] Recently viewed products
-  [x] Customer reviews
-  [x] Share product button
+Tagline:
+Elevating Everyday Living
 
-Categories Page (/categories):
-  [x] Household Items
-  [x] Clothing
-  [x] Deodorants
-  [x] Personal Care
-  [x] Featured Collections
+Brand Style:
 
-Search Page (/search):
-  [x] Real-time search
-  [x] Search suggestions
-  [x] Popular searches
-  [x] Search history
+* Premium
+* Minimal
+* Elegant
+* Trustworthy
+* Modern
+
+The website should feel like a premium lifestyle brand rather than a generic online store.
+
+The primary goal is to allow customers to browse products and place orders directly through WhatsApp.
+
+There should be:
+
+* NO customer registration
+* NO customer login
+* NO shopping cart
+* NO checkout system
+* NO payment gateway
+* NO customer dashboard
+* NO email system
+
+Customer Journey:
+
+1. Visit website
+2. Browse products
+3. View product details
+4. Contact via WhatsApp
+5. Place order manually
 
 ====================================
-2. SHOPPING EXPERIENCE
+TECH STACK
+==========
 
-Shopping Cart (drawer):
-  [x] Add/remove products
-  [x] Update quantity
-  [x] Cart subtotal
-  [x] Shipping estimate
-  [x] Tax calculation
-  [x] Coupon code support
-  [x] Save for later
-  [x] Continue shopping button
+Frontend:
 
-Wishlist:
-  [x] Save favorite products
-  [x] Move to cart
-  [x] Remove items
+* HTML
+* CSS
+* Vanilla JavaScript
 
-Checkout Flow:
-  [x] Step 1: Customer information
-  [x] Step 2: Shipping address
-  [x] Step 3: Shipping method
-  [x] Step 4: Payment
-  [x] Step 5: Order confirmation
+Backend:
 
-Checkout Features:
-  [x] Guest checkout
-  [x] Clerk account checkout
-  [x] Paystack integration
-  [x] Order summary
-  [x] Shipping calculator
-  [x] Coupon support
-  [x] Automatic email confirmation
-  [x] Display SOLLENE branding throughout checkout
-  [x] Include trust badges and secure payment indicators
+* Node.js
+* Express
 
-====================================
-3. USER ACCOUNT
+Database:
+
+* MongoDB
 
 Authentication:
-  [x] Clerk sign up page
-  [x] Clerk sign in page
-  [⚡] Social login support
-  [⚡] Password recovery
 
-Customer Dashboard:
-  [x] Profile management
-  [x] Order history
-  [x] Track orders
-  [x] Saved addresses
-  [x] Wishlist
-  [x] Account settings
-  [x] Notification preferences
+* Clerk (Admin Only)
 
-Orders:
-  [x] View all orders
-  [x] Order details page
-  [x] Download invoice
-  [x] Order status tracking
+Deployment:
 
-Order Status Types: (defined in model)
-  [x] Pending, Paid, Processing, Shipped, Delivered, Cancelled, Refunded
+* Vercel
 
 ====================================
-4. ADMIN PANEL
+DESIGN THEME
+============
 
-Admin Dashboard:
-  [x] Total sales
-  [x] Revenue analytics
-  [x] Orders overview
-  [x] Customer overview
-  [x] Product statistics
-  [x] Inventory statistics
+* Premium black and white aesthetic
+* Dominantly black with white accents
+* Modern luxury retail feel
+* Clean typography
+* Fast loading
+* Mobile-first responsive design
+* Elegant micro-interactions
+* Premium product presentation
+* Minimalist luxury brand experience
 
-Product Management:
-  [x] Create products
-  [x] Edit products
-  [x] Delete products
-  [x] Upload multiple images
-  [x] Manage stock
-  [x] Product categories
-  [x] Product variants
+Design Inspiration:
 
-Order Management:
-  [x] View orders
-  [x] Update status
-  [x] Manage refunds
-  [x] Generate invoices
-
-Customer Management:
-  [x] View customers
-  [x] Customer profiles
-  [x] Purchase history
-
-Coupon Management:
-  [x] View coupons
-  [x] Percentage discounts
-  [x] Fixed discounts
-  [x] Expiration dates
-  [x] Usage limits
-
-Content Management:
-  [x] View banners
-  [x] Promotions
-  [x] Featured products
-  [x] Announcements
+* Apple
+* Zara
+* Nike
+* Premium Shopify themes
+* Luxury lifestyle brands
 
 ====================================
-5. EMAIL SYSTEM (RESEND)
+CORE GOALS
+==========
 
-Send automated emails for:
-  [x] Welcome email
-  [x] Account creation
-  [⚡] Password reset
-  [x] Order confirmation
-  [x] Payment confirmation
-  [x] Shipping update
-  [x] Delivered notification
-  [x] Abandoned cart reminder
-  [x] Newsletter subscription
-
-All emails should:
-  [x] Use SOLLENE branding
-  [x] Include the sollene.site domain where appropriate
-  [x] Be mobile responsive
-  [x] Match the black and white premium design theme
+* Extremely easy navigation
+* Fast loading
+* Mobile-first design
+* Easy product discovery
+* Premium appearance
+* Trust-building user experience
+* SEO friendly
+* Simple product management
+* WhatsApp-driven sales
 
 ====================================
-6. PAYSTACK INTEGRATION
+PUBLIC PAGES
+============
 
-Support:
-  [x] Card payments
-  [x] Bank transfers
-  [x] Mobile payments
-  [x] Payment verification
-  [x] Secure webhook handling
-  [x] Failed payment recovery
+HOME PAGE
+
+Features:
+
+* Sticky navigation bar
+* SOLLENE logo
+* Search bar
+* Hero section
+* Featured products section
+* New arrivals section
+* Product categories section
+* About SOLLENE section
+* Contact section
+* Footer
+* Social media links
+
+Hero Section:
+
+* Premium lifestyle imagery
+* Brand tagline
+* Shop Now button
+* Browse Categories button
+
+Featured Products:
+
+* Product image
+* Product name
+* Product price
+* View Details button
 
 ====================================
-7. DATABASE STRUCTURE
+PRODUCT LISTING PAGE
+====================
 
-Collections: (all models created)
-  [x] Users
-  [x] Products
-  [x] Categories
-  [x] Orders
-  [x] OrderItems (embedded in Order)
-  [x] Addresses
-  [x] Reviews
-  [x] Coupons
-  [x] Wishlists
-  [x] Notifications
-  [x] Banners
-  [x] NewsletterSubscribers
+Features:
+
+* Product grid layout
+* Product search
+* Category filtering
+
+Sort by:
+
+* Newest
+
+* Price Low to High
+
+* Price High to Low
+
+* Featured
+
+* Pagination
+
+* Responsive layout
 
 ====================================
-8. SEO
+PRODUCT DETAILS PAGE
+====================
+
+Route:
+
+/products/:id
+
+Features:
+
+* Product image gallery
+* Product images
+* Product name
+* Product price
+* Product description
+* Product category
+* Availability status
+* Product specifications
+
+WhatsApp Order Button:
+
+When clicked, automatically open WhatsApp with:
+
+"Hello, I am interested in purchasing [Product Name]. Is it available?"
+
+The product name should be inserted automatically.
+
+====================================
+PRODUCT CATEGORIES
+==================
+
+* Household Items
+* Clothing
+* Deodorants
+* Personal Care
+* Lifestyle Essentials
+
+====================================
+SEARCH
+======
+
+Features:
+
+* Real-time search
+* Category filtering
+
+====================================
+ADMIN PANEL
+===========
+
+Route:
+
+/admin
+
+Authentication:
+
+Use Clerk.
+
+Only a single admin account should have access.
+
+Admin access must be restricted using a specific Clerk User ID stored in environment variables.
+
+No public registration.
+
+No customer accounts.
+
+No customer authentication.
+
+Only the store owner can access the admin area.
+
+====================================
+ADMIN DASHBOARD
+===============
+
+Features:
+
+* Total Products
+* Quick Add Product
+* Manage Products
+
+====================================
+PRODUCT MANAGEMENT
+==================
+
+Admin can:
+
+* Create products
+* Edit products
+* Delete products
+* Upload product images
+* Mark products as featured
+* Assign categories
+* Set prices
+* Set stock status
+* Add descriptions
+* Add specifications
+
+====================================
+DATABASE STRUCTURE
+==================
+
+Collection: Products
+
+Fields:
+
+* name
+* slug
+* description
+* price
+* category
+* images
+* featured
+* inStock
+* specifications
+* createdAt
+* updatedAt
+
+Collection: Categories
+
+Fields:
+
+* name
+* slug
+
+====================================
+SEO
+===
 
 Implement:
-  [x] Dynamic meta tags
-  [x] Open Graph tags
-  [x] Structured data (JSON-LD)
-  [x] XML sitemap
-  [x] robots.txt
-  [x] Canonical URLs
-  [x] Product SEO optimization
-  [x] Category SEO optimization
 
-Use SOLLENE and sollene.site in SEO metadata where appropriate.
+* Dynamic meta tags
+* Open Graph tags
+* Structured data
+* XML sitemap
+* robots.txt
+* Canonical URLs
+* Product SEO optimization
+* Category SEO optimization
 
-====================================
-9. ANIMATIONS
-
-Use smooth animations:
-  [x] Page transitions
-  [x] Hover effects
-  [x] Product card interactions
-  [x] Button animations
-  [x] Cart drawer animations
-  [x] Loading skeletons
-  [x] Fade-ins
-  [x] Slide animations
-  [x] Scroll reveal effects
-
-Animations should feel premium and modern, not distracting.
+Use SOLLENE and sollene.site throughout SEO metadata where appropriate.
 
 ====================================
-10. PERFORMANCE
+ANIMATIONS
+==========
+
+Use:
+
+* Fade-in effects
+* Hover effects
+* Product card interactions
+* Smooth scrolling
+* Scroll reveal effects
+
+Animations should feel smooth, premium, and professional.
+
+====================================
+PERFORMANCE
+===========
 
 Requirements:
-  [x] Lazy load images
-  [⚡] Optimized assets
-  [x] Fast API responses
-  [⚡] Caching where appropriate
-  [x] Mobile optimization
-  [⚡] Lighthouse score target 90+
+
+* Lazy-loaded images
+* Optimized assets
+* Mobile optimization
+* Fast API responses
+* Lighthouse score above 90
 
 ====================================
-11. SECURITY
+SECURITY
+========
 
 Implement:
-  [x] Clerk authentication security (middleware)
-  [x] Input validation (express-validator)
-  [x] Rate limiting (express-rate-limit)
-  [x] MongoDB query protection (Mongoose)
-  [x] Secure Paystack webhooks
-  [⚡] CSRF protection
-  [x] XSS protection (helmet)
-  [x] Environment variable protection (.env)
+
+* Admin route protection
+* Clerk middleware
+* Input validation
+* Environment variable protection
 
 ====================================
-12. EXTRA FEATURES
+EXTRA FEATURES
+==============
 
-Add:
-  [x] Dark mode ready architecture (CSS variables)
-  [x] Product reviews and ratings
-  [x] Recently viewed products
-  [x] Newsletter system (API + frontend)
-  [x] Contact page
-  [x] About page
-  [x] Privacy Policy page
-  [x] Terms & Conditions page
-  [x] Return Policy page
-  [x] Shipping Policy page
-  [x] Live inventory updates
-  [x] Featured collections
-  [x] Flash sales
-  [x] Product badges (New, Trending, Best Seller, Sale)
-  [x] Announcement bar
-  [x] Social media links
-  [x] WhatsApp support button
-  [x] Back-to-top button
-  [x] Cookie consent banner
-  [x] PWA readiness
-  [x] Offline fallback page
-  [x] Analytics integration hooks
-  [x] Error tracking hooks
+* About page
+* Contact page
+* WhatsApp floating button
+* Social media links
+* Responsive image gallery
 
 ====================================
-UI INSPIRATION
+FINAL GOAL
+==========
 
-Blend inspiration from:
-  * Apple
-  * Nike
-  * Zara
-  * Shopify premium themes
-  * Minimal luxury fashion stores
+Build a simple, elegant, premium product showcase website for SOLLENE.
 
-The final product should feel premium, trustworthy, elegant, modern, fast, and optimized for mobile users. Prioritize user experience, clean architecture, scalability, maintainability, and conversion optimization while maintaining a consistent SOLLENE brand identity throughout the entire platform.
+The focus is not online checkout.
+
+The focus is:
+
+Visitor → Browse Products → View Product → Contact on WhatsApp → Purchase
+
+Keep the codebase clean, maintainable, fast, mobile-friendly, and easy for the store owner to manage.

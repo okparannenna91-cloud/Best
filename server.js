@@ -44,9 +44,9 @@ app.use(compression());
 app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 app.use(morgan('dev'));
 
-// Capture raw body before JSON parsing for webhook HMAC verification
+// Capture raw body for Clerk webhook
 app.use((req, res, next) => {
-  if (req.path === '/api/checkout/webhook' || req.path === '/api/auth/clerk-webhook') {
+  if (req.path === '/api/auth/clerk-webhook') {
     let data = '';
     req.on('data', chunk => data += chunk);
     req.on('end', () => {
@@ -68,18 +68,12 @@ app.set('trust proxy', 1);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-const PAYSTACK_IPS = [
-  '52.31.139.75', '52.49.173.169', '52.214.14.220',
-  '35.176.93.186', '35.177.124.156', '35.177.125.220',
-];
-
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   message: { message: 'Too many requests, please try again later.' },
 });
 app.use('/api', (req, res, next) => {
-  if (req.path === '/checkout/webhook') return next();
   limiter(req, res, next);
 });
 
@@ -89,17 +83,8 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/config', (req, res) => {
   res.json({
-    paystackPublicKey: process.env.PAYSTACK_PUBLIC_KEY || '',
-    taxRate: parseFloat(process.env.TAX_RATE || '0.075'),
-    shippingThreshold: parseFloat(process.env.SHIPPING_THRESHOLD || '50000'),
-    shippingCost: parseFloat(process.env.SHIPPING_COST || '3500'),
+    whatsappNumber: process.env.WHATSAPP_NUMBER || '2348000000000',
   });
-});
-
-app.post('/api/analytics/pageview', (req, res) => {
-  const { page, referrer } = req.body || {};
-  if (page) console.log(`[Analytics] Page view: ${page} | Referrer: ${referrer || 'direct'}`);
-  res.json({ ok: true });
 });
 
 app.use('/api', routes);
@@ -108,21 +93,14 @@ app.get('/product/:slug', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'product.html'));
 });
 
-app.get('/order/:id', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'order-detail.html'));
-});
-
 // Static pages
 const staticPages = {
   '/shop': 'shop.html',
   '/categories': 'categories.html',
-  '/track-order': 'track-order.html',
   '/contact': 'contact.html',
   '/about': 'about.html',
   '/privacy-policy': 'privacy.html',
   '/terms': 'terms.html',
-  '/return-policy': 'returns.html',
-  '/shipping-policy': 'shipping.html',
   '/best-sellers': 'shop.html',
   '/new-arrivals': 'shop.html',
   '/sale': 'shop.html',
@@ -134,40 +112,11 @@ for (const [route, file] of Object.entries(staticPages)) {
   });
 }
 
-app.get('/sign-in', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'sign-in.html'));
-});
-
-app.get('/sign-up', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'sign-up.html'));
-});
-
-app.get('/account', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'account.html'));
-});
-app.get('/account/*path', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'account.html'));
-});
-
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 app.get('/admin/*path', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
-app.get('/checkout', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'checkout.html'));
-});
-
-app.get('/manifest.json', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
-});
-app.get('/sw.js', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'sw.js'));
-});
-app.get('/offline', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'offline.html'));
 });
 
 app.get('/robots.txt', (req, res) => {

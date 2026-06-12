@@ -74,7 +74,7 @@ const optionalAuth = async (req, res, next) => {
   next();
 };
 
-const ADMIN_USER_ID = 'user_3F2Nq8Lyzx9fVq2qhQGsnv6Sjjd';
+const ADMIN_USER_ID = process.env.CLERK_ADMIN_USER_ID || 'user_3F2Nq8Lyzx9fVq2qhQGsnv6Sjjd';
 
 async function autoPromoteAdmin(user, clerkUserId) {
   if (clerkUserId === ADMIN_USER_ID && !user.isAdmin) {
