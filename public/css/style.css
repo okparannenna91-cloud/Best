@@ -2918,3 +2918,167 @@ input, textarea { font-family: inherit; font-size: inherit; outline: none; }
 /* ============================
    AUTH PAGES
    ============================ */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-gray-50, #f8f8f8);
+  padding: 24px;
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 440px;
+}
+
+.auth-logo {
+  display: block;
+  text-align: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--color-black, #000);
+  margin-bottom: 32px;
+  text-decoration: none;
+}
+
+.auth-card {
+  background: var(--color-white, #fff);
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 24px rgba(0,0,0,0.04);
+}
+
+.auth-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: var(--color-black, #000);
+  text-align: center;
+}
+
+.auth-subtitle {
+  font-size: 0.9rem;
+  color: var(--color-gray-400, #999);
+  text-align: center;
+  margin: 0 0 32px;
+}
+
+.auth-footer-text {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-gray-400, #999);
+  margin-top: 24px;
+}
+
+.auth-footer-text a {
+  color: var(--color-black, #000);
+  font-weight: 500;
+  text-decoration: underline;
+}
+
+/* Clerk component overrides */
+.cl-card {
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.cl-cardBox {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.cl-main {
+  width: 100% !important;
+}
+
+.cl-socialButtonsBlockButton {
+  border: 1px solid var(--color-gray-200, #e5e5e5) !important;
+  border-radius: 8px !important;
+  height: 44px !important;
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  transition: var(--transition-fast, 0.2s) !important;
+}
+
+.cl-socialButtonsBlockButton:hover {
+  background: var(--color-gray-50, #f8f8f8) !important;
+}
+
+.cl-formButtonPrimary {
+  height: 44px !important;
+  border-radius: 8px !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  background: var(--color-black, #000) !important;
+  transition: var(--transition-fast, 0.2s) !important;
+}
+
+.cl-formButtonPrimary:hover {
+  background: var(--color-gray-800, #333) !important;
+}
+
+.cl-formFieldInput {
+  height: 44px !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--color-gray-200, #e5e5e5) !important;
+  font-size: 0.9rem !important;
+  padding: 0 14px !important;
+  transition: var(--transition-fast, 0.2s) !important;
+}
+
+.cl-formFieldInput:focus {
+  border-color: var(--color-black, #000) !important;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.08) !important;
+}
+
+.cl-formFieldLabel {
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
+  margin-bottom: 4px !important;
+}
+
+.cl-dividerLine {
+  background: var(--color-gray-200, #e5e5e5) !important;
+}
+
+.cl-dividerText {
+  font-size: 0.8rem !important;
+  color: var(--color-gray-400, #999) !important;
+}
+
+.cl-footerActionLink {
+  color: var(--color-black, #000) !important;
+  font-weight: 500 !important;
+  text-decoration: underline !important;
+}
+
+.cl-footerActionText {
+  font-size: 0.85rem !important;
+  color: var(--color-gray-400, #999) !important;
+}
+
+.cl-headerTitle {
+  display: none !important;
+}
+
+.cl-headerSubtitle {
+  display: none !important;
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 28px 20px;
+  }
+  .auth-page {
+    padding: 16px;
+  }
+}
