@@ -184,13 +184,25 @@ function showView(view) {
   if (signOutBtn) signOutBtn.style.display = view === 'app' ? 'flex' : 'none';
 }
 
+async function fetchWithTimeout(url, opts, timeoutMs) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal, ...opts });
+    return res;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function apiFetch(url, opts = {}) {
   opts.headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
-  const res = await fetch(url, opts);
   try {
+    const res = await fetchWithTimeout(url, opts, 15000);
     return await res.json();
-  } catch {
-    return { success: false, message: `Request failed (${res.status})` };
+  } catch (err) {
+    if (err.name === 'AbortError') return { success: false, message: 'Request timed out' };
+    return { success: false, message: `Request failed (${err.message})` };
   }
 }
 
@@ -225,7 +237,7 @@ async function loadSection(section) {
 
 async function fetchCategories() {
   try {
-    const r = await fetch('/api/categories');
+    const r = await fetchWithTimeout(API + '/categories', {}, 15000);
     const d = await r.json();
     categories = d.data || [];
   } catch {
@@ -335,7 +347,7 @@ async function uploadProductImage(file) {
   const formData = new FormData();
   formData.append('image', file);
   try {
-    const res = await fetch(API + '/upload', { method: 'POST', body: formData });
+    const res = await fetchWithTimeout(API + '/upload', { method: 'POST', body: formData }, 30000);
     const data = await res.json();
     if (data.success) {
       pImages.push(data.data);
