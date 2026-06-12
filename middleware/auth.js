@@ -1,74 +1,38 @@
-const { clerkClient } = require('@clerk/clerk-sdk-node');
+const jwt = require('jsonwebtoken');
 const ApiError = require('../utils/ApiError');
 
-const ADMIN_USER_ID = process.env.CLERK_ADMIN_USER_ID || 'user_3F2Nq8Lyzx9fVq2qhQGsnv6Sjjd';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
+const JWT_SECRET = process.env.JWT_SECRET || (ADMIN_PASSWORD ? require('crypto').createHash('sha256').update(ADMIN_PASSWORD).digest('hex') : 'fallback_dev_secret');
+const SESSION_DURATION = '24h';
 
-async function verifyClerkSession(sessionToken) {
-  const decoded = JSON.parse(Buffer.from(sessionToken.split('.')[1], 'base64url').toString());
-  const sessionId = decoded.sid;
-  if (!sessionId) return null;
-  const session = await clerkClient.sessions.verifySession(sessionId, sessionToken);
-  return session;
+const COOKIE_NAME = 'admin_session';
+
+function generateSession() {
+  return jwt.sign({ role: 'admin', ts: Date.now() }, JWT_SECRET, { expiresIn: SESSION_DURATION });
 }
 
-function buildUser(clerkUser) {
-  return {
-    clerkId: clerkUser.id,
-    email: clerkUser.emailAddresses?.[0]?.emailAddress || '',
-    firstName: clerkUser.firstName,
-    lastName: clerkUser.lastName,
-    avatar: clerkUser.imageUrl,
-    isAdmin: clerkUser.id === ADMIN_USER_ID,
-  };
-}
-
-const authenticate = async (req, res, next) => {
+const authenticate = (req, res, next) => {
   try {
-    const sessionToken = req.cookies?.__session || req.headers?.authorization?.replace('Bearer ', '');
+    const token = req.cookies[COOKIE_NAME];
+    if (!token) return next(ApiError.notFound());
 
-    if (!sessionToken) {
-      return next(ApiError.notFound());
-    }
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (!decoded || decoded.role !== 'admin') return next(ApiError.notFound());
 
-    const session = await verifyClerkSession(sessionToken);
-
-    if (!session) {
-      return next(ApiError.notFound());
-    }
-
-    const clerkUser = await clerkClient.users.getUser(session.userId);
-
-    req.user = buildUser(clerkUser);
-    req.clerkUserId = session.userId;
+    req.isAdmin = true;
     next();
-  } catch (error) {
+  } catch {
     return next(ApiError.notFound());
   }
-};
-
-const optionalAuth = async (req, res, next) => {
-  try {
-    const sessionToken = req.cookies?.__session || req.headers?.authorization?.replace('Bearer ', '');
-    if (!sessionToken) return next();
-
-    const session = await verifyClerkSession(sessionToken);
-
-    if (session) {
-      const clerkUser = await clerkClient.users.getUser(session.userId);
-      req.user = buildUser(clerkUser);
-      req.clerkUserId = session.userId;
-    }
-  } catch (_) {
-    // continue as guest
-  }
-  next();
 };
 
 const requireAdmin = (req, res, next) => {
-  if (!req.user || req.clerkUserId !== ADMIN_USER_ID) {
-    return next(ApiError.notFound());
-  }
+  if (!req.isAdmin) return next(ApiError.notFound());
   next();
 };
 
-module.exports = { authenticate, optionalAuth, requireAdmin };
+const optionalAuth = (req, res, next) => {
+  next();
+};
+
+module.exports = { authenticate, requireAdmin, optionalAuth, generateSession, COOKIE_NAME };

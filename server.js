@@ -8,7 +8,6 @@ const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
-const crypto = require('crypto');
 
 const connectDB = require('./config/db');
 const routes = require('./routes');
@@ -29,15 +28,14 @@ app.use(helmet({
       fontSrc: ["'self'", "https:", "data:"],
       formAction: ["'self'"],
       frameAncestors: ["'self'"],
-      imgSrc: ["'self'", "data:", "https://img.clerk.com"],
+      imgSrc: ["'self'", "data:"],
       objectSrc: ["'none'"],
-      scriptSrc: ["'self'", "https://cdn.jsdelivr.net", "https://clerk.sollene.site", "https://challenges.cloudflare.com", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
       scriptSrcAttr: ["'none'"],
       workerSrc: ["'self'", "blob:"],
       styleSrc: ["'self'", "https:", "'unsafe-inline'"],
-      frameSrc: ["'self'", "https://challenges.cloudflare.com"],
       upgradeInsecureRequests: [],
-      connectSrc: ["'self'", "https://clerk.sollene.site", "https://*.clerk.com", "https://challenges.cloudflare.com"],
+      connectSrc: ["'self'"],
     },
   },
 }));
@@ -45,39 +43,21 @@ app.use(compression());
 app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 app.use(morgan('dev'));
 
-// Capture raw body for Clerk webhook
-app.use((req, res, next) => {
-  if (req.path === '/api/auth/clerk-webhook') {
-    let data = '';
-    req.on('data', chunk => data += chunk);
-    req.on('end', () => {
-      req.rawBody = data;
-      try { req.body = JSON.parse(data); } catch (_) {}
-      next();
-    });
-  } else {
-    next();
-  }
-});
-
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// CSRF protection via SameSite cookie policy
 app.set('trust proxy', 1);
 
-const ADMIN_USER_ID = process.env.CLERK_ADMIN_USER_ID || '';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 function serveAdminHtml(req, res) {
   const filePath = path.join(__dirname, 'public', 'admin.html');
-  const html = fs.readFileSync(filePath, 'utf-8');
-  const injected = html
-    .replace("{{CLERK_PUBLISHABLE_KEY}}", process.env.CLERK_PUBLISHABLE_KEY || '')
-    .replace("{{ADMIN_USER_ID}}", ADMIN_USER_ID);
+  let html = fs.readFileSync(filePath, 'utf-8');
+  html = html.replace('{{ADMIN_CONFIGURED}}', ADMIN_PASSWORD ? 'true' : 'false');
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.set('Pragma', 'no-cache');
   res.set('Expires', '0');
-  res.type('html').send(injected);
+  res.type('html').send(html);
 }
 app.get('/admin', serveAdminHtml);
 app.get('/admin/*path', serveAdminHtml);
@@ -110,7 +90,6 @@ app.get('/product/:slug', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'product.html'));
 });
 
-// Static pages
 const staticPages = {
   '/shop': 'shop.html',
   '/categories': 'categories.html',

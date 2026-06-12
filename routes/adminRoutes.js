@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const { authenticate, requireAdmin } = require('../middleware/auth');
-const { getDashboardStats } = require('../controllers/adminController');
+const { login, logout, checkSession, getDashboardStats } = require('../controllers/adminController');
 const {
   getAllProducts, getProductById, createProduct, updateProduct, deleteProduct,
 } = require('../controllers/adminProductController');
@@ -10,8 +10,12 @@ const {
 
 const router = Router();
 
+router.post('/login', login);
+router.post('/logout', logout);
+
 router.use(authenticate, requireAdmin);
 
+router.get('/check', checkSession);
 router.get('/dashboard', getDashboardStats);
 
 router.get('/products', getAllProducts);

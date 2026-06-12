@@ -6,7 +6,6 @@
 <link rel="canonical" href="https://sollene.site/admin">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
-<script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js" crossorigin="anonymous"></script>
 <style>
 .admin-page{background:var(--color-gray-50)}
 .admin-layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - var(--header-height));margin-top:24px}
@@ -59,20 +58,27 @@ textarea.form-input{resize:vertical;min-height:80px}
 .toast{position:fixed;bottom:24px;right:24px;padding:12px 24px;background:var(--color-black);color:var(--color-white);font-size:0.85rem;z-index:2000;opacity:0;transition:var(--transition-base);pointer-events:none}
 .toast.show{opacity:1}
 .empty-state{padding:40px 0;text-align:center;color:var(--color-gray-400);font-size:0.9rem}
-.mobile-nav-select{display:none;width:100%;padding:12px 16px;border:1px solid var(--color-gray-200);font-size:0.9rem;margin-bottom:20px;background:var(--color-white)}
-@media(max-width:768px){.mobile-nav-select{display:block}}
-.variant-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--color-gray-50);font-size:0.8rem}
-.image-preview{width:36px;height:36px;background:var(--color-gray-50);overflow:hidden;border-radius:4px;flex-shrink:0}
-.image-preview img{width:100%;height:100%;object-fit:cover}
 #adminAuth,#adminApp,#notFoundPage{display:none}
 .auth-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff}
 .auth-card{text-align:center;padding:48px 32px;max-width:400px;width:100%}
 .auth-logo{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:700;color:#000;margin-bottom:12px;letter-spacing:-0.5px}
 .auth-subtitle{color:#666;margin-bottom:32px;font-size:0.9rem;letter-spacing:0.3px}
+.auth-input{width:100%;padding:14px 16px;border:1px solid #e5e5e5;font-size:0.95rem;background:#fff;color:#000;outline:none;transition:border-color 200ms}
+.auth-input:focus{border-color:#000}
+.auth-input::placeholder{color:#bbb}
+.auth-btn{width:100%;padding:14px;background:#000;color:#fff;border:none;font-size:0.85rem;font-weight:600;letter-spacing:1px;cursor:pointer;transition:opacity 200ms;text-transform:uppercase}
+.auth-btn:hover{opacity:0.85}
+.auth-error{color:#dc2626;font-size:0.8rem;margin-top:12px;display:none}
 .not-found-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff}
 .not-found-inner{text-align:center}
 .not-found-inner h1{font-family:'Playfair Display',serif;font-size:6rem;font-weight:700;color:#000;margin:0;line-height:1}
 .not-found-inner p{font-size:1rem;color:#666;margin-top:16px;letter-spacing:0.5px}
+.mobile-nav-select{display:none;width:100%;padding:12px 16px;border:1px solid var(--color-gray-200);font-size:0.9rem;margin-bottom:20px;background:var(--color-white)}
+@media(max-width:768px){.mobile-nav-select{display:block}}
+.variant-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--color-gray-50);font-size:0.8rem}
+.image-preview{width:36px;height:36px;background:var(--color-gray-50);overflow:hidden;border-radius:4px;flex-shrink:0}
+.image-preview img{width:100%;height:100%;object-fit:cover}
+.login-error-msg{color:#dc2626;font-size:0.8rem;margin-top:12px;display:none}
 </style>
 </head>
 <body class="admin-page">
@@ -100,7 +106,11 @@ textarea.form-input{resize:vertical;min-height:80px}
   <div class="auth-card">
     <div class="auth-logo">SOLLENE</div>
     <p class="auth-subtitle">Sign in to manage your store</p>
-    <div id="clerkMount"></div>
+    <form id="loginForm">
+      <input type="password" class="auth-input" id="passwordInput" placeholder="Password" autocomplete="current-password" required>
+      <div class="login-error-msg" id="loginError"></div>
+      <button type="submit" class="auth-btn" id="loginBtn" style="margin-top:16px">Sign In</button>
+    </form>
   </div>
 </div>
 
@@ -145,11 +155,7 @@ textarea.form-input{resize:vertical;min-height:80px}
 </select>
 
 <script>
-const PUBLISHABLE_KEY = '{{CLERK_PUBLISHABLE_KEY}}';
-const ADMIN_USER_ID = '{{ADMIN_USER_ID}}';
-
-let clerk = null;
-let clerkUser = null;
+const ADMIN_CONFIGURED = '{{ADMIN_CONFIGURED}}';
 const API = '/api/admin';
 let currentSection = 'dashboard';
 let categories = [];
@@ -510,110 +516,46 @@ async function deleteCategory(id, name) {
   else { toast(r.message || 'Error'); }
 }
 
-async function initClerk() {
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const password = document.getElementById('passwordInput').value;
+  const btn = document.getElementById('loginBtn');
+  const errEl = document.getElementById('loginError');
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+  errEl.style.display = 'none';
+
   try {
-    const c = new Clerk(PUBLISHABLE_KEY);
-    await c.load();
-    clerk = c;
-
-    const mountEl = document.getElementById('clerkMount');
-    const signOutBtn = document.getElementById('signOutBtn');
-
-    if (c.user) {
-      if (c.user.id === ADMIN_USER_ID) {
-        clerkUser = c.user;
-        showView('app');
-        loadSection(currentSection);
-      } else {
-        showView('404');
-        if (signOutBtn) signOutBtn.style.display = 'none';
-      }
-    } else {
-      showView('auth');
-      if (mountEl) {
-        c.mountSignIn(mountEl, {
-          appearance: {
-            variables: {
-              colorPrimary: '#000000',
-              colorTextOnPrimaryBackground: '#ffffff',
-              colorBackground: '#ffffff',
-              colorInputBackground: '#ffffff',
-              colorInputText: '#000000',
-              fontFamily: 'Inter, sans-serif',
-              borderRadius: '0px',
-            },
-            elements: {
-              card: { boxShadow: 'none', border: '1px solid #e5e5e5', borderRadius: '0' },
-              headerTitle: { display: 'none' },
-              headerSubtitle: { display: 'none' },
-              socialButtonsBlockButton: { borderRadius: '0', border: '1px solid #000', fontWeight: '500' },
-              formButtonPrimary: { backgroundColor: '#000', borderRadius: '0', fontSize: '0.85rem', fontWeight: '600' },
-              footerAction: { display: 'none' },
-              formFieldLabel: { fontWeight: '500', fontSize: '0.8rem' },
-              formFieldInput: { borderRadius: '0', border: '1px solid #e5e5e5', fontSize: '0.9rem' },
-              dividerLine: { background: '#e5e5e5' },
-              dividerText: { color: '#999', fontSize: '0.75rem' },
-            },
-          },
-        });
-      }
-    }
-
-    c.addListener(({ user }) => {
-      if (user) {
-        if (user.id === ADMIN_USER_ID) {
-          clerkUser = user;
-          showView('app');
-          loadSection(currentSection);
-        } else {
-          showView('404');
-        }
-      } else {
-        clerkUser = null;
-        showView('auth');
-        if (mountEl) {
-          c.mountSignIn(mountEl, {
-            appearance: {
-              variables: {
-                colorPrimary: '#000000',
-                colorTextOnPrimaryBackground: '#ffffff',
-                colorBackground: '#ffffff',
-                colorInputBackground: '#ffffff',
-                colorInputText: '#000000',
-                fontFamily: 'Inter, sans-serif',
-                borderRadius: '0px',
-              },
-              elements: {
-                card: { boxShadow: 'none', border: '1px solid #e5e5e5', borderRadius: '0' },
-                headerTitle: { display: 'none' },
-                headerSubtitle: { display: 'none' },
-                socialButtonsBlockButton: { borderRadius: '0', border: '1px solid #000', fontWeight: '500' },
-                formButtonPrimary: { backgroundColor: '#000', borderRadius: '0', fontSize: '0.85rem', fontWeight: '600' },
-                footerAction: { display: 'none' },
-                formFieldLabel: { fontWeight: '500', fontSize: '0.8rem' },
-                formFieldInput: { borderRadius: '0', border: '1px solid #e5e5e5', fontSize: '0.9rem' },
-                dividerLine: { background: '#e5e5e5' },
-                dividerText: { color: '#999', fontSize: '0.75rem' },
-              },
-            },
-          });
-        }
-      }
+    const r = await apiFetch(API + '/login', {
+      method: 'POST',
+      body: JSON.stringify({ password }),
     });
-
-    if (signOutBtn) {
-      signOutBtn.addEventListener('click', () => { c.signOut(); });
+    if (r.success) {
+      showView('app');
+      loadSection(currentSection);
+    } else {
+      showView('404');
     }
-  } catch (err) {
-    document.getElementById('adminAuth').innerHTML = `
-      <div class="auth-card">
-        <div class="auth-logo">SOLLENE</div>
-        <p style="color:#dc2626;font-size:0.85rem">Unable to load authentication.</p>
-      </div>`;
+  } catch {
+    showView('404');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
   }
-}
+});
 
-document.addEventListener('DOMContentLoaded', () => {
+document.getElementById('signOutBtn').addEventListener('click', async () => {
+  await apiFetch(API + '/logout', { method: 'POST' });
+  showView('auth');
+  document.getElementById('passwordInput').value = '';
+  document.getElementById('passwordInput').focus();
+});
+
+document.getElementById('passwordInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
   const s = window.location.pathname.split('/admin')[1]?.replace(/^\//, '') || 'dashboard';
   if (['dashboard', 'products', 'categories'].includes(s)) {
     document.querySelector(`.admin-nav-item[data-section="${s}"]`)?.classList.add('active');
@@ -628,15 +570,22 @@ document.addEventListener('DOMContentLoaded', () => {
     switchSection(this.value);
   });
 
-  if (PUBLISHABLE_KEY && PUBLISHABLE_KEY !== '{{CLERK_PUBLISHABLE_KEY}}' && ADMIN_USER_ID !== '{{ADMIN_USER_ID}}') {
-    initClerk();
-  } else {
+  if (ADMIN_CONFIGURED !== 'true') {
     document.getElementById('adminAuth').innerHTML = `
       <div class="auth-card">
         <div class="auth-logo">SOLLENE</div>
         <p style="color:#dc2626;font-size:0.85rem">Configuration incomplete.</p>
-        <p style="font-size:0.8rem;color:#666">Set CLERK_PUBLISHABLE_KEY and CLERK_ADMIN_USER_ID in environment variables.</p>
+        <p style="font-size:0.8rem;color:#666">Set ADMIN_PASSWORD in environment variables.</p>
       </div>`;
+    return;
+  }
+
+  const r = await apiFetch(API + '/check');
+  if (r.success) {
+    showView('app');
+    loadSection(currentSection);
+  } else {
+    showView('auth');
   }
 });
 </script>
