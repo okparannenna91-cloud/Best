@@ -1,5 +1,4 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -14,8 +13,6 @@ const routes = require('./routes');
 const errorHandler = require('./middleware/errorHandler');
 
 require('dotenv').config();
-
-connectDB();
 
 const app = express();
 
@@ -72,6 +69,16 @@ const limiter = rateLimit({
 });
 app.use('/api', (req, res, next) => {
   limiter(req, res, next);
+});
+
+app.use('/api', async (req, res, next) => {
+  if (req.path === '/health' || req.path === '/config') return next();
+  try {
+    await connectDB();
+    next();
+  } catch {
+    res.status(500).json({ success: false, message: 'Database connection unavailable' });
+  }
 });
 
 app.get('/api/health', (req, res) => {
