@@ -329,6 +329,7 @@ async function renderProducts(el) {
 
 let pVariants = [];
 let pImages = [];
+let catImageData = null;
 
 function renderImageList() {
   const el = document.getElementById('pImageList');
@@ -368,6 +369,50 @@ async function removeProductImage(index) {
   }
   pImages.splice(index, 1);
   renderImageList();
+}
+
+function renderCategoryImage() {
+  const el = document.getElementById('catImagePreview');
+  if (!el) return;
+  if (!catImageData) { el.innerHTML = '<p style="color:var(--color-gray-400);font-size:0.8rem">No image uploaded.</p>'; return; }
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--color-gray-50)">
+      <div class="image-preview"><img src="${catImageData.url}" onerror="this.style.display=\'none\'"></div>
+      <span style="flex:1;font-size:0.75rem;color:var(--color-gray-500);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${catImageData.publicId || catImageData.url}</span>
+      <button type="button" class="btn btn-outline btn-xs" style="color:#dc2626" onclick="removeCategoryImage()">×</button>
+    </div>`;
+}
+
+async function uploadCategoryImage(file) {
+  const formData = new FormData();
+  formData.append('image', file);
+  try {
+    const res = await fetchWithTimeout(API + '/upload', { method: 'POST', body: formData }, 30000);
+    const data = await res.json();
+    if (data.success) {
+      catImageData = data.data;
+      renderCategoryImage();
+    } else {
+      toast('Upload failed');
+    }
+  } catch {
+    toast('Upload error');
+  }
+}
+
+function handleCategoryImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  uploadCategoryImage(file);
+  event.target.value = '';
+}
+
+function removeCategoryImage() {
+  if (catImageData?.publicId) {
+    apiFetch(API + '/remove-image', { method: 'POST', body: JSON.stringify({ publicId: catImageData.publicId }) });
+  }
+  catImageData = null;
+  renderCategoryImage();
 }
 
 function productForm(id) {
@@ -559,6 +604,7 @@ async function renderCategories(el) {
 
 function categoryForm(id) {
   const isEdit = !!id;
+  catImageData = null;
   openModal(`<h2>${isEdit ? 'Edit' : 'Add'} Category</h2>
     <form id="categoryForm" style="display:flex;flex-direction:column;gap:12px">
       <div class="form-row">
@@ -567,7 +613,13 @@ function categoryForm(id) {
       </div>
       <div class="form-group"><label>Description</label><textarea class="form-input" id="catDesc" rows="2"></textarea></div>
       <div class="form-row">
-        <div class="form-group"><label>Image URL</label><input class="form-input" id="catImage" placeholder="https://..."></div>
+        <div style="border:1px solid var(--color-gray-100);padding:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <strong style="font-size:0.85rem">Image</strong>
+            <label class="btn btn-outline btn-xs" style="cursor:pointer">+ Upload<input type="file" id="catImageInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="display:none" onchange="handleCategoryImageUpload(event)"></label>
+          </div>
+          <div id="catImagePreview" style="font-size:0.85rem"><p style="color:var(--color-gray-400);font-size:0.8rem">No image uploaded.</p></div>
+        </div>
         <div class="form-group"><label>Order</label><input class="form-input" id="catOrder" type="number" value="0"></div>
       </div>
       <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem"><input type="checkbox" id="catActive" checked> Active</label>
@@ -583,7 +635,8 @@ function categoryForm(id) {
       document.getElementById('catName').value = c.name;
       document.getElementById('catSlug').value = c.slug || '';
       document.getElementById('catDesc').value = c.description || '';
-      document.getElementById('catImage').value = c.image || '';
+      if (c.image) catImageData = { url: c.image, publicId: '' };
+      renderCategoryImage();
       document.getElementById('catOrder').value = c.order || 0;
       document.getElementById('catActive').checked = c.isActive !== false;
     });
@@ -597,7 +650,7 @@ function categoryForm(id) {
       name: document.getElementById('catName').value,
       slug: document.getElementById('catSlug').value || undefined,
       description: document.getElementById('catDesc').value,
-      image: document.getElementById('catImage').value,
+      image: catImageData?.url || '',
       order: Number(document.getElementById('catOrder').value),
       isActive: document.getElementById('catActive').checked,
     };
