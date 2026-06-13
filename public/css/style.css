@@ -843,11 +843,16 @@ input, textarea { font-family: inherit; font-size: inherit; outline: none; }
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  transition: var(--transition-base);
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-100);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
 
 .product-card:hover {
   transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
 }
 
 .product-card-image {
@@ -920,6 +925,7 @@ input, textarea { font-family: inherit; font-size: inherit; outline: none; }
   display: flex;
   flex-direction: column;
   gap: 6px;
+  padding: 0 16px 16px;
 }
 
 .product-card-name {
@@ -998,7 +1004,17 @@ input, textarea { font-family: inherit; font-size: inherit; outline: none; }
 
 .feature-card {
   text-align: center;
-  padding: 32px 24px;
+  padding: 40px 28px;
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-100);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
 }
 
 .feature-icon {
@@ -1023,6 +1039,115 @@ input, textarea { font-family: inherit; font-size: inherit; outline: none; }
   line-height: 1.6;
 }
 
+/* --- Card --- */
+.card {
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-100);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  box-shadow: var(--shadow-sm);
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.contact-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.contact-card .contact-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-gray-400);
+  margin-bottom: 4px;
+}
+
+.contact-card .contact-link {
+  color: var(--color-black);
+  font-weight: 500;
+}
+
+.contact-card .contact-text {
+  color: var(--color-gray-600);
+}
+
+.contact-card .contact-item {
+  margin-bottom: 20px;
+}
+
+.contact-card .contact-item:last-of-type {
+  margin-bottom: 32px;
+}
+
+.social-grid {
+  display: flex;
+  gap: 12px;
+}
+
+.social-grid a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-black);
+  color: var(--color-black);
+  transition: background var(--transition-base), color var(--transition-base);
+}
+
+.social-grid a:hover {
+  background: var(--color-black);
+  color: var(--color-white);
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-gray-400);
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--color-gray-200);
+  font-size: 0.95rem;
+  background: var(--color-white);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--color-black);
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.08);
+}
+
+@media (max-width: 768px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+  .card {
+    padding: 24px;
+  }
+}
+
 /* --- Reviews Slider --- */
 .reviews-slider {
   display: grid;
@@ -1031,11 +1156,20 @@ input, textarea { font-family: inherit; font-size: inherit; outline: none; }
 }
 
 .review-card {
-  background: var(--color-gray-50);
+  background: var(--color-white);
   padding: 32px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  border: 1px solid var(--color-gray-100);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.review-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
 }
 
 .review-stars {
