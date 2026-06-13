@@ -2,8 +2,6 @@
    SOLLENE — Product Details Page
    ============================ */
 
-const API_BASE = '/api';
-
 let whatsappNumber = '2348000000000';
 
 async function loadWhatsAppConfig() {

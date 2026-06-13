@@ -2,7 +2,6 @@
    SOLLENE — Shop Listing Page
    ============================ */
 
-const API_BASE = '/api';
 const PRODUCTS_PER_PAGE = 12;
 
 let currentState = {
@@ -35,8 +34,10 @@ function getStateFromQuery() {
   const params = new URLSearchParams(window.location.search);
   currentState.page = parseInt(params.get('page')) || 1;
   currentState.category = params.get('category') || '';
-  currentState.minPrice = params.get('minPrice') || '';
-  currentState.maxPrice = params.get('maxPrice') || '';
+  const rawMin = params.get('minPrice');
+  const rawMax = params.get('maxPrice');
+  currentState.minPrice = rawMin && !isNaN(rawMin) && Number(rawMin) >= 0 ? rawMin : '';
+  currentState.maxPrice = rawMax && !isNaN(rawMax) && Number(rawMax) >= 0 ? rawMax : '';
   currentState.search = params.get('search') || '';
   currentState.sort = params.get('sort') || 'newest';
   currentState.inStock = params.get('inStock') === 'true';
@@ -176,15 +177,17 @@ function renderCategoryFilters(categories) {
 
   container.innerHTML = html;
 
-  container.querySelectorAll('input[name="category"]').forEach((radio) => {
-    radio.addEventListener('change', (e) => {
-      if (e.target.checked) {
-        currentState.category = e.target.value;
-        currentState.page = 1;
-        updateShop();
-      }
-    });
-  });
+  if (container._catHandler) {
+    container.removeEventListener('change', container._catHandler);
+  }
+  container._catHandler = (e) => {
+    if (e.target.name === 'category' && e.target.checked) {
+      currentState.category = e.target.value;
+      currentState.page = 1;
+      updateShop();
+    }
+  };
+  container.addEventListener('change', container._catHandler);
 }
 
 function renderActiveFilters() {
@@ -256,10 +259,18 @@ async function updateShop() {
   renderActiveFilters();
 
   const container = document.getElementById('shopProducts');
+  const empty = document.getElementById('shopEmpty');
   container.innerHTML = `<div class="skeleton-grid">${Array.from({ length: 8 }, () => '<div class="skeleton-card"></div>').join('')}</div>`;
+  empty?.classList.add('hidden');
 
   const data = await fetchProducts();
-  if (!data) return;
+  if (!data) {
+    container.innerHTML = '';
+    empty?.classList.remove('hidden');
+    document.getElementById('shopEmptyTitle').textContent = 'Something went wrong';
+    document.getElementById('shopEmptyText').textContent = 'Failed to load products. Check your connection and try again.';
+    return;
+  }
 
   renderProducts(data.data);
   renderPagination(data.data.length, data.pagination.page, data.pagination.pages);
@@ -268,6 +279,12 @@ async function updateShop() {
 
 async function initShop() {
   getStateFromQuery();
+
+  const path = window.location.pathname;
+  if (!window.location.search) {
+    if (path === '/new-arrivals') currentState.sort = 'newest';
+    if (path === '/sale' || path === '/best-sellers') currentState.sort = 'best_selling';
+  }
 
   const categories = await fetchCategories();
   renderCategoryFilters(categories);
@@ -297,8 +314,13 @@ async function initShop() {
   });
 
   document.getElementById('priceApply').addEventListener('click', () => {
-    currentState.minPrice = document.getElementById('minPrice').value;
-    currentState.maxPrice = document.getElementById('maxPrice').value;
+    const min = document.getElementById('minPrice').value;
+    const max = document.getElementById('maxPrice').value;
+    const minVal = min && !isNaN(min) && Number(min) >= 0 ? min : '';
+    const maxVal = max && !isNaN(max) && Number(max) >= 0 ? max : '';
+    if (minVal && maxVal && Number(minVal) > Number(maxVal)) return;
+    currentState.minPrice = minVal;
+    currentState.maxPrice = maxVal;
     currentState.page = 1;
     updateShop();
   });
@@ -323,9 +345,15 @@ async function initShop() {
     document.body.style.overflow = 'hidden';
   });
 
-  document.getElementById('sidebarClose').addEventListener('click', () => {
+  const closeSidebar = () => {
     document.querySelector('.shop-sidebar').classList.remove('open');
     document.body.style.overflow = '';
+  };
+
+  document.getElementById('sidebarClose').addEventListener('click', closeSidebar);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSidebar();
   });
 
   document.querySelector('.filter-group')?.classList.add('open');
