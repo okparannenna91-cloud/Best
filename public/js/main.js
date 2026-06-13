@@ -25,19 +25,19 @@ async function fetchAPI(endpoint, options = {}) {
 
 async function loadFeaturedProducts() {
   const data = await fetchAPI('/products/featured');
-  if (!data?.data) return;
+  if (!data?.data) { document.getElementById('featuredProducts').innerHTML = ''; return; }
   renderProducts('featuredProducts', data.data);
 }
 
 async function loadNewArrivals() {
   const data = await fetchAPI('/products/new-arrivals');
-  if (!data?.data) return;
+  if (!data?.data) { document.getElementById('newArrivals').innerHTML = ''; return; }
   renderProducts('newArrivals', data.data);
 }
 
 async function loadBestSellers() {
   const data = await fetchAPI('/products/best-sellers');
-  if (!data?.data) return;
+  if (!data?.data) { document.getElementById('bestSellers').innerHTML = ''; return; }
   renderProducts('bestSellers', data.data);
 }
 
@@ -263,6 +263,17 @@ function initSearch() {
       input.value = tag.textContent;
       window.location = `/shop?search=${encodeURIComponent(tag.textContent)}`;
     });
+  });
+
+  const submitSearch = () => {
+    const q = (input?.value || '').trim();
+    if (q.length >= 2) window.location = `/shop?search=${encodeURIComponent(q)}`;
+  };
+
+  document.querySelector('.search-submit')?.addEventListener('click', submitSearch);
+
+  input?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') submitSearch();
   });
 
   let searchTimeout;
