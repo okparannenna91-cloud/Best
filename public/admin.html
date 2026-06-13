@@ -348,7 +348,7 @@ async function uploadProductImage(file) {
   const formData = new FormData();
   formData.append('image', file);
   try {
-    const res = await fetchWithTimeout(API + '/upload', { method: 'POST', body: formData }, 80000);
+    const res = await fetchWithTimeout(API + '/upload', { method: 'POST', body: formData }, 300000);
     const data = await res.json();
     if (data.success) {
       pImages.push(data.data);
@@ -387,7 +387,7 @@ async function uploadCategoryImage(file) {
   const formData = new FormData();
   formData.append('image', file);
   try {
-    const res = await fetchWithTimeout(API + '/upload', { method: 'POST', body: formData }, 80000);
+    const res = await fetchWithTimeout(API + '/upload', { method: 'POST', body: formData }, 300000);
     const data = await res.json();
     if (data.success) {
       catImageData = data.data;
