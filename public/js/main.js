@@ -88,6 +88,12 @@ function renderProducts(containerId, products) {
       </div>
     `;
   }).join('');
+
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.fade-in').forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), i * 50);
+    });
+  });
 }
 
 function renderCategories(categories) {
@@ -101,6 +107,12 @@ function renderCategories(categories) {
       <span class="category-card-title">${escapeHtml(cat.name)}</span>
     </a>
   `).join('');
+
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.fade-in').forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), i * 50);
+    });
+  });
 }
 
 function renderHeroSlides(banners) {

@@ -55,6 +55,12 @@ function renderRecentlyViewed() {
       </div>
     </div>
   `).join('');
+
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.fade-in').forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), i * 50);
+    });
+  });
 }
 
 async function fetchProduct(slug) {
@@ -295,6 +301,12 @@ async function loadRelatedProducts(productId) {
       </div>
     `;
   }).join('');
+
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.fade-in').forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), i * 50);
+    });
+  });
 }
 
 function initShare() {
