@@ -377,12 +377,25 @@ async function loadCategoryDropdown() {
   ).join('');
 }
 
+async function initConfig() {
+  try {
+    const res = await fetch('/api/config');
+    const data = await res.json();
+    if (data.whatsappNumber) {
+      document.querySelectorAll('a[href*="wa.me/"]').forEach((a) => {
+        a.href = `https://wa.me/${data.whatsappNumber}`;
+      });
+    }
+  } catch { /* ignore */ }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initMobileMenu();
   initSearch();
   initFAQ();
   initScrollEffects();
   initAnnouncement();
+  initConfig();
 
   loadHeroBanners();
   loadCategories();

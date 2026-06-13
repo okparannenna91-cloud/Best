@@ -2,7 +2,7 @@
    SOLLENE — Product Details Page
    ============================ */
 
-let whatsappNumber = '2348000000000';
+let whatsappNumber = '2348055188508';
 
 async function loadWhatsAppConfig() {
   try {

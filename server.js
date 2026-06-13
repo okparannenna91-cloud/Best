@@ -88,7 +88,7 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/config', (req, res) => {
   res.json({
-    whatsappNumber: process.env.WHATSAPP_NUMBER || '2348000000000',
+    whatsappNumber: process.env.WHATSAPP_NUMBER || '2348055188508',
   });
 });
 
