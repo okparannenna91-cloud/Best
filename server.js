@@ -131,8 +131,11 @@ app.use('/api', (req, res) => {
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`SOLLENE server running on port ${PORT}`);
 });
+server.timeout = 310000;
+server.headersTimeout = 310000;
+server.requestTimeout = 310000;
 
 module.exports = app;
