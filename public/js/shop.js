@@ -77,7 +77,7 @@ async function fetchCategories() {
   }
 }
 
-function renderProducts(products) {
+function renderShopProducts(products) {
   const container = document.getElementById('shopProducts');
   const empty = document.getElementById('shopEmpty');
 
@@ -272,7 +272,7 @@ async function updateShop() {
     return;
   }
 
-  renderProducts(data.data);
+  renderShopProducts(data.data);
   renderPagination(data.data.length, data.pagination.page, data.pagination.pages);
   updateResultsCount(data.pagination.total);
 }
