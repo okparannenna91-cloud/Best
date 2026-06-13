@@ -5,7 +5,7 @@
 
 const API_BASE = '/api';
 const formatPrice = (n) => '₦' + Number(n).toLocaleString('en-US');
-function getImgUrl(img) { if (!img) return ''; if (typeof img === 'string') return img; return img.url || ''; }
+function getImgUrl(img) { if (!img) return ''; if (typeof img === 'string') return img; const url = img.url || ''; return url && (url.startsWith('http') || url.startsWith('/') || url.startsWith('data:')) ? url : ''; }
 function getProductImage(product) { return product.images?.length ? getImgUrl(product.images[0]) : ''; }
 function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
