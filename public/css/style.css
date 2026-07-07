@@ -2735,15 +2735,201 @@ input, textarea { font-family: inherit; font-size: inherit; outline: none; }
 .product-share-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  width: 100%;
+  padding: 12px;
   font-size: 0.85rem;
   color: var(--color-gray-500);
-  transition: var(--transition-fast);
+  border: 1px solid var(--color-gray-200);
+  background: var(--color-white);
+  transition: all var(--transition-fast);
+  cursor: pointer;
 }
 
 .product-wishlist-btn:hover,
 .product-share-btn:hover {
   color: var(--color-black);
+  border-color: var(--color-black);
+}
+
+.product-share-btn:active {
+  transform: scale(0.97);
+}
+
+/* --- Share Menu --- */
+.share-wrapper {
+  position: relative;
+  margin-top: 4px;
+}
+
+.share-menu {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: var(--color-white);
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -4px 30px rgba(0,0,0,0.15);
+  transform: translateY(100%);
+  transition: transform var(--transition-base);
+  visibility: hidden;
+}
+
+.share-menu.open {
+  transform: translateY(0);
+  visibility: visible;
+}
+
+.share-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-black);
+  border-bottom: 1px solid var(--color-gray-100);
+}
+
+.share-menu-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  color: var(--color-gray-400);
+  transition: all var(--transition-fast);
+}
+
+.share-menu-close:hover {
+  background: var(--color-gray-100);
+  color: var(--color-black);
+}
+
+.share-menu-body {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 16px 24px;
+}
+
+.share-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 12px;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-gray-800);
+  background: transparent;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.share-option:hover {
+  background: var(--color-gray-50);
+}
+
+.share-option:active {
+  transform: scale(0.98);
+}
+
+.share-option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.share-icon-whatsapp {
+  color: #25D366;
+  background: rgba(37, 211, 102, 0.1);
+}
+
+.share-icon-facebook {
+  color: #1877F2;
+  background: rgba(24, 119, 242, 0.1);
+}
+
+.share-option-label {
+  line-height: 1;
+}
+
+.share-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0,0,0,0.4);
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition-base);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+.share-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (min-width: 769px) {
+  .share-menu {
+    position: absolute;
+    bottom: auto;
+    top: auto;
+    left: auto;
+    right: 0;
+    z-index: 100;
+    width: 280px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(8px) scale(0.96);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-fast);
+    transform-origin: top right;
+    margin-top: 4px;
+    border: 1px solid var(--color-gray-100);
+  }
+
+  .share-menu.open {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .share-menu-header {
+    padding: 16px 20px 10px;
+  }
+
+  .share-menu-body {
+    padding: 4px 12px 12px;
+  }
+
+  .share-option {
+    padding: 10px 10px;
+    font-size: 0.9rem;
+  }
+
+  .share-option-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .share-wrapper {
+    margin-top: 0;
+  }
+
+  .share-overlay {
+    display: none;
+  }
 }
 
 /* --- Trust Items --- */

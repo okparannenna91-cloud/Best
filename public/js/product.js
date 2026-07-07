@@ -91,6 +91,9 @@ function renderProduct(product) {
   document.getElementById('ogDesc').textContent = product.description || '';
   document.getElementById('ogUrl').content = window.location.href;
   document.getElementById('ogImage').content = getProductImage(product);
+  document.getElementById('twitterTitle').content = `${product.name} — SOLLENE`;
+  document.getElementById('twitterDesc').content = product.description || '';
+  document.getElementById('twitterImage').content = getProductImage(product);
   document.getElementById('canonical').href = window.location.href;
 
   document.getElementById('breadcrumbCategory').textContent = product.category?.name || '';
@@ -310,19 +313,76 @@ async function loadRelatedProducts(productId) {
 }
 
 function initShare() {
-  document.getElementById('shareBtn')?.addEventListener('click', () => {
-    if (navigator.share) {
-      navigator.share({
-        title: document.title,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      const span = document.querySelector('#shareBtn span');
-      const orig = span.textContent;
-      span.textContent = 'Copied!';
-      setTimeout(() => (span.textContent = orig), 2000);
+  const shareBtn = document.getElementById('shareBtn');
+  const shareMenu = document.getElementById('shareMenu');
+  const shareOverlay = document.getElementById('shareOverlay');
+  const shareClose = document.getElementById('shareMenuClose');
+
+  if (!shareBtn || !shareMenu) return;
+
+  function openShareMenu(e) {
+    e.stopPropagation();
+    shareMenu.classList.add('open');
+    shareOverlay?.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    shareBtn.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeShareMenu() {
+    shareMenu.classList.remove('open');
+    shareOverlay?.classList.remove('open');
+    document.body.style.overflow = '';
+    shareBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  function getShareText() {
+    const product = window._currentProduct;
+    const name = product?.name || document.title;
+    const url = window.location.href;
+    return { name, url };
+  }
+
+  function shareToWhatsApp() {
+    const { name, url } = getShareText();
+    const text = `Check out this beautiful product from SOLLENE:%0A%0A${name}%0A${url}`;
+    window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
+    closeShareMenu();
+  }
+
+  function shareToFacebook() {
+    const { url } = getShareText();
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank', 'noopener,noreferrer');
+    closeShareMenu();
+  }
+
+  shareBtn.addEventListener('click', openShareMenu);
+
+  shareClose?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeShareMenu();
+  });
+
+  shareOverlay?.addEventListener('click', closeShareMenu);
+
+  document.getElementById('shareWhatsApp')?.addEventListener('click', shareToWhatsApp);
+  document.getElementById('shareFacebook')?.addEventListener('click', shareToFacebook);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && shareMenu.classList.contains('open')) {
+      closeShareMenu();
     }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (shareMenu.classList.contains('open') && !shareMenu.contains(e.target) && e.target !== shareBtn && !shareBtn.contains(e.target)) {
+      closeShareMenu();
+    }
+  });
+
+  shareMenu.querySelectorAll('.share-option').forEach((opt) => {
+    opt.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeShareMenu();
+    });
   });
 }
 
